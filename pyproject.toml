@@ -39,7 +39,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=utils -p no:warnings"
+addopts = "--cov=utils --cov=validation -p no:warnings"
 testpaths = [
     "test",
 ]

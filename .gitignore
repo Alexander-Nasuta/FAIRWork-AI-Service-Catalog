@@ -50,6 +50,8 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+.idea/
+.idea/**/*
 
 # Translations
 *.mo
@@ -187,3 +189,4 @@ fabric.properties
 
 # idea folder, uncomment if you don't need it
 # .idea
+/logs/
