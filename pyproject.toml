@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=42.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "FAIRWork-AI-Service-Catalog"
+version = "0.2.0"
+description = "A Repository containing several AI Services. These Services may be querried via a REST-API endpoint."
+readme = "README.md"
+authors = [
+    { name = "Alexander Nasuta", email = "alexander.nasuta@ima.rwth-aachen.de" },
+    { name = "Sylwia Olbrych", email = "sylwia.olbrych@ima.rwth-aachen.de"},
+    { name = "Johanna Lauwigi", email = "johanna.lauwigi@ima.rwth-aachen.de"},
+    { name= "Zi Xuan Tung", email="zi.xuan.tung@ima.rwth-aachen.de"}
+]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+    "rich",
+    "torch",
+    "numpy",
+    "pandas",
+    "flask-restx",
+    "requests",
+    "waitress",
+]
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = [
+    "pip-tools",
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.pytest.ini_options]
+addopts = "--cov=utils -p no:warnings"
+testpaths = [
+    "test",
+]
+
+
+[project.urls]
+Homepage = "https://fairwork-project.eu/"
+
