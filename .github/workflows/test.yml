@@ -28,3 +28,4 @@ jobs:
       run: python -c "import shutil; shutil.copytree('${{ github.workspace }}/resources', '${{ runner.temp }}/Lib/resources', dirs_exist_ok=True)"
     - name: Test with tox
       run: tox
+      timeout-minutes: 10  # Set a timeout for this step
