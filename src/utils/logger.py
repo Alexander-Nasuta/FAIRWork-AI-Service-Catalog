@@ -18,6 +18,67 @@ w, h = shutil.get_terminal_size((80, 20))
 print(wzl_banner)
 print(fairwork_banner)
 
+my_dict_config = {
+  "version": 1,
+  "disable_existing_loggers": False,
+  "formatters": {
+    "simple": {
+      "format": "%(levelname)s %(message)s"
+    },
+    "detailed": {
+      "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
+      "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+    },
+    "json": {
+      "()": "utils.json_file_logger.MyJSONFormatter",
+      "fmt_keys": {
+        "level": "levelname",
+        "message": "message",
+        "timestamp": "timestamp",
+        "logger": "name",
+        "module": "module",
+        "function": "funcName",
+        "line": "lineno",
+        "thread_name": "threadName"
+      }
+    }
+  },
+  "handlers": {
+    "stderr": {
+      "level": "WARNING",
+      "formatter": "simple",
+      "class": "logging.StreamHandler",
+      "stream": "ext://sys.stderr"
+    },
+    "file": {
+      "level": "DEBUG",
+      "formatter": "detailed",
+      "class": "logging.handlers.RotatingFileHandler",
+      "filename": "logs/app.log",
+      "maxBytes": 10485760,
+      "backupCount": 5
+    },
+    "json_file": {
+      "level": "DEBUG",
+      "formatter": "json",
+      "class": "logging.handlers.RotatingFileHandler",
+      "filename": "logs/app.log.jsonl",
+      "maxBytes": 10485760,
+      "backupCount": 5
+    },
+    "stdout": {
+      "class": "rich.logging.RichHandler",
+      "level": "INFO",
+      "formatter": "simple"
+    }
+  },
+  "loggers": {
+    "root": {
+      "level": "DEBUG",
+      "handlers": ["stderr", "file", "json_file", "stdout"]
+    }
+  }
+}
 def setup_logging():
     """
 
@@ -46,10 +107,10 @@ def setup_logging():
                                             
     loads json file with logging configuration from resources/logging_configs/config.json
     """
-    config_file = project_root_path.joinpath("resources", "logging_configs", "config.json")
-    with open(config_file, "r") as f:
-        config = json.load(f)
-    logging.config.dictConfig(config)
+    #config_file = project_root_path.joinpath("resources", "logging_configs", "config.json")
+    #with open(config_file, "r") as f:
+    #   config = json.load(f)
+    logging.config.dictConfig(my_dict_config)
 
 
 

@@ -97,7 +97,21 @@ def test_valid_line_info(line_info, expected):
              "ProductionPriority": "True", # valid values are "True" or "False"
              "DueDate": 3, # valid range is [-10, 10] (both inclusive)
              "WorkersRequired": 0 # valid range is [1, 8] (both inclusive)
-        }, ValueError)
+        }, ValueError),
+        ({
+             # "LineId": "17", # missing key
+             "Geometry": "1343314080",
+             "ProductionPriority": "True", # valid values are "True" or "False"
+             "DueDate": 3, # valid range is [-10, 10] (both inclusive)
+             "WorkersRequired": 0 # valid range is [1, 8] (both inclusive)
+        }, KeyError),
+        ({
+             "LineId": 17, # wrong type
+             "Geometry": "1343314080",
+             "ProductionPriority": "True", # valid values are "True" or "False"
+             "DueDate": 3, # valid range is [-10, 10] (both inclusive)
+             "WorkersRequired": 0 # valid range is [1, 8] (both inclusive)
+        }, TypeError)
     ],
 )
 def test_validate_line_info_with_invalid_values(line_info, expected):

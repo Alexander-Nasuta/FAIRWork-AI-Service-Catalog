@@ -56,8 +56,20 @@ def test_valid_worker_preference_list(preference_list, expected):
              {"LineId": "17", "Value": 1},
              {"LineId": "20", "Value": 0}
          ], TypeError),
+        ([
+             {"Value": 0},
+             {"LineId": "17", "Value": 1},
+             {"LineId": "20", "Value": 0}
+         ], KeyError),
+        ([
+             {"LineId": 17, "Value": 0.1},
+             {"LineId": "18", "Value": 0.0},
+             {"LineId": "20", "Value": 0.9}
+         ], TypeError),
     ],
 )
 def test_invalid_worker_preference_list(preference_list, expected):
     with pytest.raises(expected):
         validate_worker_preference_list(preference_list)
+
+

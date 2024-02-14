@@ -148,13 +148,7 @@ def validate_line_info(line_info: dict) -> None:
 
 
 if __name__ == '__main__':
-
-
-
-    log.info("asd")
-
     import json
-
     data = None
     # file = resources_dir_path.joinpath("OutputKBv2.json")
     # file = resources_dir_path.joinpath("OutputKB.json")
