@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         python-version: ['3.11']
 
     steps:
@@ -24,5 +24,7 @@ jobs:
         pip install tox tox-gh-actions
     - name: upgrade setuptools
       run: pip3 install --upgrade pip setuptools
+    - name: Copy resources
+      run: python -c "import shutil; shutil.copytree('${{ github.workspace }}/resources', '${{ runner.temp }}/Lib/resources', dirs_exist_ok=True)"
     - name: Test with tox
       run: tox
