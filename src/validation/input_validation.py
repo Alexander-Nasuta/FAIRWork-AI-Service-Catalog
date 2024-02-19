@@ -27,6 +27,16 @@ def validate_order_info_list(order_info_list: list) -> None:
     for order in order_info_list:
         validate_order_info_list_elem(order)
 
+        # check if all worker infor lists have the same ids
+        list_of_worker_id_sets: list[set] = [
+            set(e["Id"] for e in order_info_list_elem["WorkerInfoList"])
+            for order_info_list_elem in order_info_list
+        ]
+        # test if all sets contain equal ids
+        if not all([s == list_of_worker_id_sets[0] for s in list_of_worker_id_sets]):
+            log.error(f"worker_info_list contains different worker ids for different lines")
+            raise ValueError(f"worker_info_list contains different worker ids for different lines")
+
 
 def validate_order_info_list_elem(order_info_list_elem: dict) -> None:
     expected_key_types = [
@@ -57,6 +67,18 @@ def validate_order_info_list_elem(order_info_list_elem: dict) -> None:
     if len(worker_ids) != len(set(worker_ids)):
         log.error(f"worker_info_list contains duplicate worker ids")
         raise ValueError(f"worker_info_list contains duplicate worker ids")
+
+    # check if there are mor or equal workers required than workers available
+    num_available_workers = len(
+        [e for e in order_info_list_elem["WorkerInfoList"] if e["Availability"] == "True"]
+    )
+    num_required_workers = order_info_list_elem["LineInfo"]["WorkersRequired"]
+    if num_available_workers < num_required_workers:
+        log.error(f"not enough workers available for line '{order_info_list_elem['LineInfo']['LineId']}'")
+        raise ValueError(
+            f"not enough workers available for line '{order_info_list_elem['LineInfo']['LineId']}' "
+            f"({num_available_workers} available, {num_required_workers} required)"
+        )
 
 
 

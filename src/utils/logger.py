@@ -23,7 +23,7 @@ my_dict_config = {
   "disable_existing_loggers": False,
   "formatters": {
     "simple": {
-      "format": "%(levelname)s %(message)s"
+      "format": "%(message)s"
     },
     "detailed": {
       "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
@@ -67,9 +67,9 @@ my_dict_config = {
       "backupCount": 5
     },
     "stdout": {
-      "class": "rich.logging.RichHandler",
+      "()": "rich.logging.RichHandler",
+      "show_path": False,
       "level": "INFO",
-      "formatter": "simple"
     }
   },
   "loggers": {
