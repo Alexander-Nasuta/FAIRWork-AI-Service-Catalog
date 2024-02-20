@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "FAIRWork-AI-Service-Catalog"
-version = "0.2.0"
+version = "1.0.0"
 description = "A Repository containing several AI Services. These Services may be querried via a REST-API endpoint."
 readme = "README.md"
 authors = [
@@ -31,7 +31,7 @@ dependencies = [
     "ortools",
     "wandb",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 
 [project.optional-dependencies]
 dev = [
