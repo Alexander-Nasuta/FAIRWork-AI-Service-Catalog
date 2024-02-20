@@ -10,10 +10,10 @@ def validate_instance(instance: dict) -> None:
     ]
     for key, expected_type in expected_key_types:
         if key not in instance:
-            log.error(f"instance missing key '{key}'")
+            log.error(f"instance missing key '{key}'", extra=instance)
             raise KeyError(f"instance missing key '{key}'")
         if not isinstance(instance[key], expected_type):
-            log.error(f"instance key '{key}' has unexpected type '{type(instance[key])}'")
+            log.error(f"instance key '{key}' has unexpected type '{type(instance[key])}'", extra=instance)
             raise TypeError(f"instance key '{key}' has unexpected type '{type(instance[key])}'")
 
     validate_order_info_list(instance["OrderInfoList"])

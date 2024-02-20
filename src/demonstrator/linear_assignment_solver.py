@@ -5,6 +5,8 @@ from utils.project_paths import resources_dir_path
 from validation.input_validation import validate_instance
 from ortools.graph.python import linear_sum_assignment
 
+from validation.output_valiation import validate_output_dict
+
 
 def cost_function(
         Availability: str | None = None,
@@ -199,7 +201,12 @@ def allocate_using_linear_assignment_solver(instance: dict) -> dict:
                                     "MedicalCondition":  worker_info_elem["MedicalCondition"],
                                     "UTEExperience": worker_info_elem["UTEExperience"],
                                     "WorkerResilience": worker_info_elem["WorkerResilience"],
-                                    "WorkerPreference": worker_info_elem["WorkerPreference"],
+                                    # fin matching worker preference
+                                    "WorkerPreference": sum([ # using sum instead of using index 0, just coding style
+                                        e["Value"]
+                                        for e in worker_info_elem["WorkerPreference"]
+                                        if e["LineId"] == t_details["line_info"]["LineId"]
+                                    ]),
                                 }
                             )
                             break
@@ -209,6 +216,9 @@ def allocate_using_linear_assignment_solver(instance: dict) -> dict:
             ]
         }
         log.info(f"'OPTIMAL' solution found: {pprint.pformat(res)}", extra=res)
+
+        validate_output_dict(res)
+
         return res
 
     raise ValueError(f"no optimal solution found")
