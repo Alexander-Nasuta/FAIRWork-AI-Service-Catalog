@@ -1,6 +1,6 @@
 import pytest
 
-from validation.output_valiation import validate_allocation
+from validation.output_validation import validate_allocation
 
 
 # Test for validate_allocation function

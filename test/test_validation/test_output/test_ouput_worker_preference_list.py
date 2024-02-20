@@ -1,6 +1,6 @@
 import pytest
 
-from validation.output_valiation import validate_worker
+from validation.output_validation import validate_worker
 
 
 # Test for validate_worker function

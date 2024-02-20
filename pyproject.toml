@@ -28,6 +28,8 @@ dependencies = [
     "flask-restx",
     "requests",
     "waitress",
+    "ortools",
+    "wandb",
 ]
 requires-python = ">=3.10"
 
@@ -39,7 +41,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=utils --cov=validation -p no:warnings"
+addopts = "--cov=utils --cov=validation --cov=demonstrator --cov=data_generator -p no:warnings"
 testpaths = [
     "test",
 ]

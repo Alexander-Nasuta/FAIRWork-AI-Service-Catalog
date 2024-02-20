@@ -5,7 +5,7 @@ from utils.project_paths import resources_dir_path
 from validation.input_validation import validate_instance
 from ortools.graph.python import linear_sum_assignment
 
-from validation.output_valiation import validate_output_dict
+from validation.output_validation import validate_output_dict
 
 
 def cost_function(

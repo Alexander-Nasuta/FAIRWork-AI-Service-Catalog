@@ -3,7 +3,7 @@ import json
 import pytest
 
 from utils.project_paths import resources_dir_path
-from validation.output_valiation import validate_output_dict
+from validation.output_validation import validate_output_dict
 
 
 # Test for validate_dict function

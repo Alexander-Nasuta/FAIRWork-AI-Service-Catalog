@@ -47,6 +47,14 @@ def validate_worker(worker):
         log.error("'WorkerPreference' must be a Real", extra=worker)
         raise TypeError("'WorkerPreference' must be a Real")
 
+    if worker["Availability"] != 'True':
+        log.error("'Availability' must be 'True'", extra=worker)
+        raise ValueError("'Availability' must be 'True'")
+
+    if worker["MedicalCondition"] != 'True':
+        log.warning(f"Worker with Id {worker['Id']} is present in an allocation, "
+                    f"but It's 'MedicalCondition' is not 'True'", extra=worker)
+
 
 def validate_allocation(allocation):
     if not isinstance(allocation, dict):
