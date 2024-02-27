@@ -9,11 +9,22 @@ from flask import Flask
 from flask_restx import Api, Resource, fields
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from utils.project_paths import resources_dir_path
+
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0.0', title='AI models API', description='AI Enrichment FAIRWork Demonstrator.')
 
-ns = api.namespace('demonstrator', description='Endpoint calls')
+ns = api.namespace('demonstrator', description='Endpoints')
+
+example_order_info_list = []
+try:
+    import json
+    file = resources_dir_path.joinpath("OutputKB_Final.json")
+    with open(file) as json_file:
+        example_order_info_list = json.load(json_file)["OrderInfoList"]
+except Exception as e:
+    log.warning(f"could not load example input data: {e}. defaulting to empty list")
 
 worker_preference_list_element = api.model('WorkerPreferenceListElement', {
     'LineId': fields.List(required=True, description='', cls_or_instance=fields.String),
@@ -44,7 +55,12 @@ order_info = api.model('OrderInfo', {
 })
 
 input_service = api.model('InputService', {
-    'OrderInfoList': fields.List(required=True, description='', cls_or_instance=fields.Nested(order_info)),
+    'OrderInfoList': fields.List(
+        required=True,
+        description='',
+        cls_or_instance=fields.Nested(order_info),
+        default=example_order_info_list
+    ),
 })
 
 
@@ -66,4 +82,5 @@ output_allocation_list_element = api.model('OutputAllocationListElement', {
 output_service = api.model('OutputService', {
     'AllocationList': fields.List(required=True, description='', cls_or_instance=fields.Nested(output_allocation_list_element)),
 })
+
 
