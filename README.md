@@ -37,6 +37,27 @@ The Swagger-UI looks like this:
 One can also test the API using the Swagger-UI and perform requests to the API.
 The default values represent a valid example request to the API.
 
+## AI Models
+
+### Linear Assignment Solver
+The Linear Assignment Solver is an exact solver for the linear assignment problem of the demonstrator.
+For running it standalone, the `src/demonstrator/linear_assignment_solver.py` script can be used.
+Running the script will solve the linear assignment problem for the example instance (`resources/OutputKB_Final.json`) and print the result to the console.
+
+```python src/demonstrator/linear_assignment_solver.py```
+
+![lin-assignment-solver-screenshot](./resources/readme-content/lin-solver-screenshot.png)
+
+### Neural Network Model
+The Neural Network Model is a simple neural network model, that is used to demonstrate the integration of a neural network model into the FAIRWork Demonstrator.
+The model is trained on example Input-Output instances and can be used to predict the output for a given input.
+For running it standalone, the `src/demonstrator/neural_network_model.py` script can be used.
+Running the script will train the model on the example instances and predict the output for the example input.
+
+```python src/demonstrator/neural_network.py```
+
+![nn-screenshot](./resources/readme-content/nn-screenshot.png)
+
 ## Testing
 
 ### Unit Tests with `pytest`
