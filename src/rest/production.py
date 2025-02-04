@@ -8,7 +8,7 @@ def main() -> None:
     from waitress import serve
     log.info("starting flask app...")
     app = import_endpoints()
-    serve(app, host="0.0.0.0", port=8080)
+    serve(app, host="0.0.0.0", port=80)
 
 
 if __name__ == '__main__':

@@ -34,7 +34,7 @@ except Exception as e:
 try:
     import json
 
-    file = resources_dir_path.joinpath("crf_service_input.json")
+    file = resources_dir_path.joinpath("crf_service_input2.json")
     with open(file) as json_file:
         example_crf_service_input = json.load(json_file)
 except Exception as e:
@@ -166,10 +166,16 @@ geometry_line_mapping_model = api.model('GeometryLineMapping', {
 },
 """
 
+
+def validate_throughput(value):
+    if not isinstance(value, (str, int)):
+        raise ValueError("Throughput must be a string or an integer")
+
+
 throughput_mapping_model = api.model('ThroughputMapping', {
     'line': fields.String(required=True, example="line 20", description="Production line name"),
     'geometry': fields.String(required=True, example="505355480", description="Geometry name"),
-    'throughput': fields.Integer(required=True, example=400, description="Throughput value")
+    'throughput': fields.Raw(required=True, example=400, description="Throughput value")
 })
 
 """
@@ -187,7 +193,7 @@ throughput_mapping_model = api.model('ThroughputMapping', {
 
 order_data_model = api.model('OrderData', {
     'order': fields.String(required=True, example="SEV - 38", description="Order identifier"),
-    'deadline': fields.String(required=True, example="2021-12-31", description="Order deadline (YYYY-MM-DD)"),
+    'deadline': fields.Integer(required=True, example="2021-12-31", description="Order deadline (YYYY-MM-DD)"),
     'priority': fields.String(required=True, example="false", description="Order priority"),
     'geometry': fields.String(required=True, example="534259080", description="Geometry associated with the order"),
     'amount': fields.Integer(required=True, example=6000, description="Order amount"),
@@ -197,38 +203,56 @@ order_data_model = api.model('OrderData', {
 # Combine all models into a single request body model
 request_body_model = api.model(
     'WorkerAssignmentRequest', {
+        'perform_allocation_for_lines': fields.List(
+            fields.String,
+            example=["line 17", "line 20", "line 24"],
+            default=["line 17", "line 20", "line 24"],
+            required=False,
+            description='List of lines for which allocation should be performed.'
+        ),
         'start_time_timestamp': fields.Integer(
             equired=True,
-            example=1693548000,
+            example=example_crf_service_input["start_time_timestamp"],
             description="Start time of the planning window in Unix timestamp format."
         ),
         'order_data': fields.List(
             fields.Nested(order_data_model),
             required=True,
+            example=example_crf_service_input["order_data"],
             description="List of orders with their details."
         ),
         'geometry_line_mapping': fields.List(
             fields.Nested(geometry_line_mapping_model),
             required=True,
+            example=example_crf_service_input["geometry_line_mapping"],
             description="Mapping of geometries to production lines."
         ),
         'throughput_mapping': fields.List(
             fields.Nested(throughput_mapping_model),
             required=True,
+            example=[
+                {
+                    "line": elem["line"],
+                    "geometry": elem["geometry"],
+                    "throughput": elem["throughput"] if isinstance(elem["throughput"], int) else None
+                }
+                for elem in example_crf_service_input["throughput_mapping"]
+            ],
             description="List of throughput mappings for each line.",
         ),
         'human_factor': fields.List(
             fields.Nested(human_factor_model),
             required=True,
+            example=example_crf_service_input["human_factor"],
             description="Human factor details for workers and geometries."
         ),
         'availabilities': fields.List(
             fields.Nested(availabilities_model),
             required=True,
+            example=example_crf_service_input["availabilities"],
             description="Availability details for workers."
         ),
     },
-    default=example_crf_service_input
 )
 
 """
@@ -265,7 +289,7 @@ request_body_model = api.model(
 
 """
         {
-
+            
             "Task": "Order 0",
             "Start": 1699096800000,  // Unix timestamp for "2024-11-04 09:00:00"
             "Finish": 1699104000000, // Unix timestamp for "2024-11-04 13:00:00"
@@ -307,11 +331,8 @@ response_crf_body_model = api.model(
 
         "allocations": fields.List(required=True, description='',
                                    cls_or_instance=fields.Nested(output_crf_allocation_list_element)),
-    }
+    },
 )
 
 if __name__ == '__main__':
-    print(pprint.pformat(example_crf_service_input))
-
-
-
+    print('###' * 20)
