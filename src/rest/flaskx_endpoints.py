@@ -1,5 +1,6 @@
 import pprint
 import itertools
+import numpy as np
 from typing import List, Dict, Any
 
 import pandas as pd
@@ -7,6 +8,7 @@ import pandas as pd
 from flask_restx import Resource, abort
 from jsp_vis.console import gantt_chart_console
 
+from demonstrator.crf_worker_allocation_gym_env import CrfWorkerAllocationEnv
 from demonstrator.linear_assignment_solver import allocate_using_linear_assignment_solver
 from demonstrator.neural_network import get_solution
 from rest.flaskx_api_namespace_crf import ns, api, app, single_output_service, single_input_service, human_factor_model, \
@@ -369,6 +371,69 @@ class CrfCpOptimizerTardinessEndpoint(Resource):
 
         return res
 
+
+
+
+
+
+
+@ns.route('/crf-order-to-line/rl-worker-allocation')
+class CrfCpOptimizerMakespanEndpoint(Resource):
+    @ns.doc('crf-worker-to-line')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint for the linear assignment optimizer."""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+        )
+
+        env.render()
+        env.reset()
+
+        terminal = False
+        while not terminal:
+            # print valid actions for all rows with is_current_interval == 1
+            for row_idx, row in env.get_state().iterrows():
+                if row['is_current_interval'] == 1:
+                    valid_actions = env.valid_action_tuples_for_row(row_idx)
+                    # log.critical(f"valid actions for row {row_idx}: {valid_actions}")
+
+            action = np.random.choice(env.valid_action_list())
+            log.info(f"action: {action} ({env.action_idx_to_action_tuple(action)})")
+            _, rew, terminal, _, _ = env.step(action)
+            log.info(f"reward: {rew}")
+            env.render()
+
+        allocation_with_worker_data = env.get_worker_allocation()
+        log.info(pprint.pformat(allocation_with_worker_data))
+
+        return {
+            "experience": None, # todo: get from env infos
+            "preference": None, # todo: get from env infos
+            "resilience": None, # todo: get from env infos
+            "transparency": "high",
+            "allocations": allocation_with_worker_data,
+        }
 
 
 def import_endpoints():

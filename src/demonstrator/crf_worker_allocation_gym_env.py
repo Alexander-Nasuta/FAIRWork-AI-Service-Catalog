@@ -105,7 +105,7 @@ class CrfWorkerAllocationEnv(gym.Env):
                               start_timestamp: int,
                               ) -> pd.DataFrame:
 
-        line_allocations = previous_step_output['allocations']
+        line_allocations = previous_step_output
 
         # map line allocation to solver time domain
         line_allocations = [
@@ -434,9 +434,9 @@ class CrfWorkerAllocationEnv(gym.Env):
 
         # todo: find a more elegant way for going to the next interval in the terminal corner case
         all_rows_done = True
-        for row_idx, row in env.get_state().iterrows():
+        for row_idx, row in self.get_state().iterrows():
             if row['is_current_interval'] == 1:
-                valid_actions = env.valid_action_tuples_for_row(row_idx)
+                valid_actions = self.valid_action_tuples_for_row(row_idx)
                 # log.info(f"valid actions for row {row_idx}: {valid_actions}")
                 if len(valid_actions):
                     all_rows_done = False
@@ -723,7 +723,7 @@ if __name__ == '__main__':
 
 
     env = CrfWorkerAllocationEnv(
-        previous_step_output=step_1_output,
+        previous_step_output=step_1_output['allocations'],
         worker_availabilities=worker_availabilities,
         geometry_line_mapping=geometry_line_mapping,
         human_factor_data=human_factor_data,
