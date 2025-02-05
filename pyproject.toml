@@ -32,6 +32,7 @@ dependencies = [
     "wandb",
     "jsp_vis",
     "ortools",
+    "gymnasium",
 ]
 requires-python = ">=3.9"
 

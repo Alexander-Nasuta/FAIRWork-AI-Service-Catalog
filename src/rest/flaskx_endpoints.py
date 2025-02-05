@@ -249,7 +249,6 @@ def _perform_order_to_line_mapping(
         elem["order"] = allocated_alternative["order"]
 
     log.info(pprint.pformat(remapped_solution_dict))
-
     return remapped_solution_dict
 
 
@@ -358,13 +357,17 @@ class CrfCpOptimizerTardinessEndpoint(Resource):
             tardiness_weight=1
         )
 
-        return {
+        res = {
             "experience": None,
             "preference": None,
             "resilience": None,
             "transparency": "high",
             "allocations": allocations_dict,
         }
+
+        print(repr(res))
+
+        return res
 
 
 

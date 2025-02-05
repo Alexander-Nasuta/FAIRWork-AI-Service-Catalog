@@ -254,6 +254,7 @@ request_body_model = api.model(
         ),
     },
 )
+print(repr(example_crf_service_input["geometry_line_mapping"]))
 
 """
 'start_time_timestamp': fields.Integer(
