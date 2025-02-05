@@ -33,6 +33,8 @@ dependencies = [
     "jsp_vis",
     "ortools",
     "gymnasium",
+    "stable_baselines3",
+    "sb3-contrib",
 ]
 requires-python = ">=3.9"
 
@@ -41,6 +43,7 @@ dev = [
     "pip-tools",
     "pytest",
     "pytest-cov",
+
 ]
 
 [tool.pytest.ini_options]
