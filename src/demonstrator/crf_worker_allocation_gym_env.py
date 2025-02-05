@@ -408,6 +408,15 @@ class CrfWorkerAllocationEnv(gym.Env):
             if not len(valid_actions_for_row):
                 self._state.at[action_row, 'row_done'] = 1
                 row_done_without_meeting_required_workers_penalty = -10
+            # check also for the remaining rows with is_current_interval == 1 and row_done == 0 if there are no more
+            # workers available
+            for row_idx, row in self._state.iterrows():
+                if row['is_current_interval'] == 1:
+                    valid_actions_for_row = self.valid_action_tuples_for_row(row_idx)
+                    if not len(valid_actions_for_row):
+                        self._state.at[row_idx, 'row_done'] = 1
+                        row_done_without_meeting_required_workers_penalty = -10
+
 
         # 1.3
         for row_idx, action_row in self._state.iterrows():
@@ -423,6 +432,18 @@ class CrfWorkerAllocationEnv(gym.Env):
 
         nested_reward = 0
 
+        # todo: find a more elegant way for going to the next interval in the terminal corner case
+        all_rows_done = True
+        for row_idx, row in env.get_state().iterrows():
+            if row['is_current_interval'] == 1:
+                valid_actions = env.valid_action_tuples_for_row(row_idx)
+                # log.info(f"valid actions for row {row_idx}: {valid_actions}")
+                if len(valid_actions):
+                    all_rows_done = False
+                    break
+        if all_rows_done:
+            goto_next_interval = True
+
         if goto_next_interval:
             prev_interval_no = self._state[self._state['is_current_interval'] == 1]['interval_no'].iloc[0]
             next_interval_no = prev_interval_no + 1
@@ -432,17 +453,18 @@ class CrfWorkerAllocationEnv(gym.Env):
             # set all rows with interval_no == current_interval_no to is_current_interval = 0
             self._state.loc[self._state['interval_no'] == prev_interval_no, 'is_current_interval'] = 0
 
+            # set all rows with interval_no == next_interval_no to is_current_interval = 1
+            self._state.loc[self._state['interval_no'] == next_interval_no, 'is_current_interval'] = 1
+
             # check if we are in the last interval
             if self.is_terminal_state():
+                print("terminal state reached")
                 reward = self._calculate_reward(
                     named_worker_tuple=allocated_updated_named_tuple,
                     is_terminal=True,
                     row_done_without_meeting_required_workers_penalty=row_done_without_meeting_required_workers_penalty
                 )
                 return self._state_as_numpy_array(), nested_reward + reward, True, False, {}
-
-            # set all rows with interval_no == next_interval_no to is_current_interval = 1
-            self._state.loc[self._state['interval_no'] == next_interval_no, 'is_current_interval'] = 1
 
             if self._allocate_workers_on_the_same_line_if_possible:
                 # if
@@ -689,11 +711,11 @@ class CrfWorkerAllocationEnv(gym.Env):
 
 if __name__ == '__main__':
 
-    start_timestamp = 1693548000
-    step_1_output = cp_solver_output
+    #start_timestamp = 1693548000
+    #step_1_output = cp_solver_output
 
-    #start_timestamp = 1693807200
-    #step_1_output = cp_solver_output2
+    start_timestamp = 1693807200
+    step_1_output = cp_solver_output2
 
     worker_availabilities = worker_availabilities
     geometry_line_mapping = geometry_line_mapping
@@ -706,6 +728,7 @@ if __name__ == '__main__':
         geometry_line_mapping=geometry_line_mapping,
         human_factor_data=human_factor_data,
         start_timestamp=start_timestamp,
+        allocate_workers_on_the_same_line_if_possible=False,
     )
     env.render()
     env.reset()
@@ -715,9 +738,16 @@ if __name__ == '__main__':
 
     terminal = False
     while not terminal:
-        action = np.random.choice(env.valid_action_list())
-        _, rew, terminal, _, _ = env.step(action)
-        print(f"reward: {rew}")
-        # env.render()
+        # print valid actions for all rows with is_current_interval == 1
+        for row_idx, row in env.get_state().iterrows():
+            if row['is_current_interval'] == 1:
+                valid_actions = env.valid_action_tuples_for_row(row_idx)
+                # log.critical(f"valid actions for row {row_idx}: {valid_actions}")
 
-    print(pprint.pformat(env.get_worker_allocation()))
+        action = np.random.choice(env.valid_action_list())
+        log.info(f"action: {action} ({env.action_idx_to_action_tuple(action)})")
+        _, rew, terminal, _, _ = env.step(action)
+        log.info(f"reward: {rew}")
+        env.render()
+
+    log.info(pprint.pformat(env.get_worker_allocation()))
