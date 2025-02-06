@@ -444,6 +444,10 @@ class CrfWorkerAllocationEnv(gym.Env):
         if all_rows_done:
             goto_next_interval = True
 
+        # if valid action mask has only zeros, then goto_next_interval
+        if not self.valid_action_mask().any():
+            goto_next_interval = True
+
         if goto_next_interval:
             prev_interval_no = self._state[self._state['is_current_interval'] == 1]['interval_no'].iloc[0]
             next_interval_no = prev_interval_no + 1
