@@ -43,7 +43,7 @@ dev = [
     "pip-tools",
     "pytest",
     "pytest-cov",
-
+    "inquirer",
 ]
 
 [tool.pytest.ini_options]

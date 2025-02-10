@@ -595,7 +595,7 @@ class CrfWorkerAllocationEnv(gym.Env):
             if col.startswith('worker_') and not df[col].isna().all():
                 cols_to_display.append(col)
                 n_visualized += 1
-            if n_visualized >= 5:
+            if n_visualized >= 4:
                 break
         print(self._worker_to_idx_map)
         print(df[cols_to_display].to_string())
