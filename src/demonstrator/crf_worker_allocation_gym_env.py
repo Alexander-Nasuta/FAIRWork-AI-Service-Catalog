@@ -698,10 +698,10 @@ class CrfWorkerAllocationEnv(gym.Env):
                 "_Start_human_readable": self._human_readable_timestamp(solver_time_to_timestamp(row['interval_start'], self._start_timestamp)),
                 "Finish": solver_time_to_timestamp(row['interval_end'], self._start_timestamp),
                 "_Finish_human_readable": self._human_readable_timestamp(solver_time_to_timestamp(row['interval_end'], self._start_timestamp)),
-                "Resource": "line 24",
-                "Task": "SEV - 36 × 533908540",
-                "geometry": "533908540",
-                "order": "SEV - 36",
+                "Resource": row['line'],
+                "Task": row['Task'],
+                "geometry": row['geometry'],
+                "order": row['Task'].split(' × ')[0],
                 "required_workers": row['required_workers'],
                 "workers": allocated_workers
             }
@@ -734,6 +734,7 @@ if __name__ == '__main__':
         start_timestamp=start_timestamp,
         allocate_workers_on_the_same_line_if_possible=False,
     )
+
     env.render()
     env.reset()
 
