@@ -1,3 +1,4 @@
+import copy
 import pprint
 from collections import namedtuple
 from datetime import datetime
@@ -217,8 +218,8 @@ class CrfWorkerAllocationEnv(gym.Env):
                 return preference, resilience, medical_condition, experience
         else:
             log.warning(f"no human factor data found for worker '{worker}' and geometry '{geometry}'. "
-                        f"Returning default values of (0, 0, False, 0)")
-            return 0, 0, True, 0
+                        f"Returning default values of (0.5, 0.5, True, 0.5)")
+            return 0.5, 0.5, True, 0.5
 
     @staticmethod
     def _human_readable_timestamp(timestamp: int | float) -> str:
@@ -335,7 +336,11 @@ class CrfWorkerAllocationEnv(gym.Env):
             return reward
         else:
             if is_terminal:
-                raise NotImplementedError()
+                experience, resilience, preference = env.get_KPIs()
+                weighted_sum = self._preference_weight * preference + self._resilience_weight * resilience + self._experience_weight * experience
+                scaled_weighted_sum = weighted_sum / (
+                            self._preference_weight + self._resilience_weight + self._experience_weight)
+                return scaled_weighted_sum
             else:
                 return 0
 
@@ -416,7 +421,6 @@ class CrfWorkerAllocationEnv(gym.Env):
                     if not len(valid_actions_for_row):
                         self._state.at[row_idx, 'row_done'] = 1
                         row_done_without_meeting_required_workers_penalty = -10
-
 
         # 1.3
         for row_idx, action_row in self._state.iterrows():
@@ -602,7 +606,8 @@ class CrfWorkerAllocationEnv(gym.Env):
 
     def is_terminal_state(self) -> bool:
         # the terminal state is reached when is_current_interval is 0 for all rows
-        return not self._state['is_current_interval'].any()
+        # return not self._state['is_current_interval'].any()
+        return not len(self.valid_action_tuples())
 
     def _get_allocated_workers_in_row(self, row_idx: int) -> list[str]:
         # find all columns that start with 'worker_' and have allocated == 1
@@ -667,7 +672,7 @@ class CrfWorkerAllocationEnv(gym.Env):
         return [i for i, is_valid in enumerate(self.valid_action_mask()) if is_valid]
 
     def random_rollout(self) -> int:
-        done = self.is_terminal_state()
+        done = len(self.valid_action_mask())
 
         # unfortunately, we dont have any information about the past rewards
         # so we just return the cumulative reward from the current state onwards
@@ -680,6 +685,106 @@ class CrfWorkerAllocationEnv(gym.Env):
             cumulative_reward_from_current_state_onwards += rew
 
         return cumulative_reward_from_current_state_onwards
+
+    def get_number_of_workers(self) -> int:
+        return self._n_workers
+
+    def get_number_of_intervals(self) -> int:
+        return self._state['interval_no'].nunique()
+
+    def _get_KPI_highscore(self):
+        possible_high_score = 0
+        total_time = self._state[self._state['interval_no'] == self.get_number_of_intervals() - 1]['interval_end'].max()
+        for row_idx, row in self._state.iterrows():
+            interval_length = row['interval_end'] - row['interval_start']
+            weigth = interval_length / total_time
+
+            required_workers = row['required_workers']
+
+            possible_high_score += required_workers * weigth
+        return possible_high_score
+
+    def get_KPIs(self) -> (float, float, float):
+
+        score_experience = 0
+        score_resilience = 0
+        score_preference = 0
+
+        possible_high_score = 0
+
+        # total_time is the maximum time of the last interval
+        total_time = self._state[self._state['interval_no'] == self.get_number_of_intervals() - 1]['interval_end'].max()
+
+        for row_idx, row in self._state.iterrows():
+            interval_length = row['interval_end'] - row['interval_start']
+            weigth = interval_length / total_time
+
+            required_workers = row['required_workers']
+
+            possible_high_score += required_workers * weigth
+
+            row_score_experience = 0
+            row_score_resilience = 0
+            row_score_preference = 0
+
+            for worker, worker_idx in self._worker_to_idx_map.items():
+                if not isinstance(row[worker], tuple):
+                    continue
+                if row[worker].allocated == 1:
+                    row_score_experience += row[worker].experience
+                    row_score_resilience += row[worker].resilience
+                    row_score_preference += row[worker].preference
+
+            score_experience += row_score_experience * weigth
+            score_resilience += row_score_resilience * weigth
+            score_preference += row_score_preference * weigth
+
+        experience = score_experience / possible_high_score
+        resilience = score_resilience / possible_high_score
+        preference = score_preference / possible_high_score
+
+        return experience, resilience, preference
+
+    def best_eager_action(self) -> int:
+        best_action = None
+        best_reward = -np.inf
+
+        for (row, worker) in self.valid_action_tuples():
+            action = self.action_tuple_to_action_idx((row, worker))
+
+            worker_tuple = self._state.at[row, self._idx_to_worker_map[worker]]
+            worker_preference = worker_tuple.preference
+            worker_resilience = worker_tuple.resilience
+            worker_experience = worker_tuple.experience
+
+            score = self._preference_weight * worker_preference + self._resilience_weight * worker_resilience + self._experience_weight * worker_experience
+
+            reward_prognoses = score
+
+            if reward_prognoses > best_reward:
+                best_reward = reward_prognoses
+                best_action = action
+
+        return best_action
+
+    def greedy_rollout_sparse(self) -> int:
+        done = not len(self.valid_action_mask())
+
+        # unfortunately, we dont have any information about the past rewards
+        # so we just return the cumulative reward from the current state onwards
+        cumulative_reward_from_current_state_onwards = 0
+
+        while not done:
+            best_action = self.best_eager_action()
+            _, rew, done, _, _ = self.step(best_action)
+            cumulative_reward_from_current_state_onwards += rew
+            print(f"best action: {best_action}, reward: {rew}")
+
+        experience, resilience, preference = self.get_KPIs()
+        weighted_sum = self._preference_weight * preference + self._resilience_weight * resilience + self._experience_weight * experience
+        scaled_weighted_sum = weighted_sum / (
+                self._preference_weight + self._resilience_weight + self._experience_weight)
+        return scaled_weighted_sum
 
     def get_worker_allocation(self, filter_no_workers_assigned=False) -> list[dict]:
         allocations = []
@@ -695,9 +800,11 @@ class CrfWorkerAllocationEnv(gym.Env):
 
             allocation_element = {
                 "Start": solver_time_to_timestamp(row['interval_start'], self._start_timestamp),
-                "_Start_human_readable": self._human_readable_timestamp(solver_time_to_timestamp(row['interval_start'], self._start_timestamp)),
+                "_Start_human_readable": self._human_readable_timestamp(
+                    solver_time_to_timestamp(row['interval_start'], self._start_timestamp)),
                 "Finish": solver_time_to_timestamp(row['interval_end'], self._start_timestamp),
-                "_Finish_human_readable": self._human_readable_timestamp(solver_time_to_timestamp(row['interval_end'], self._start_timestamp)),
+                "_Finish_human_readable": self._human_readable_timestamp(
+                    solver_time_to_timestamp(row['interval_end'], self._start_timestamp)),
                 "Resource": row['line'],
                 "Task": row['Task'],
                 "geometry": row['geometry'],
@@ -715,8 +822,8 @@ class CrfWorkerAllocationEnv(gym.Env):
 
 if __name__ == '__main__':
 
-    #start_timestamp = 1693548000
-    #step_1_output = cp_solver_output
+    # start_timestamp = 1693548000
+    # step_1_output = cp_solver_output
 
     start_timestamp = 1693807200
     step_1_output = cp_solver_output2
@@ -724,7 +831,6 @@ if __name__ == '__main__':
     worker_availabilities = worker_availabilities
     geometry_line_mapping = geometry_line_mapping
     human_factor_data = human_factor
-
 
     env = CrfWorkerAllocationEnv(
         previous_step_output=step_1_output['allocations'],

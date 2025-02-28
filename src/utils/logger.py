@@ -14,77 +14,111 @@ w, h = shutil.get_terminal_size((80, 20))
 # print(f"terminal dimensions: {w}x{h}")
 
 
-#print(small_banner if w < 140 else big_banner)
+# print(small_banner if w < 140 else big_banner)
 print(wzl_banner)
 print(fairwork_banner)
 
 my_dict_config = {
-  "version": 1,
-  "disable_existing_loggers": False,
-  "formatters": {
-    "simple": {
-      "format": "%(message)s"
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(message)s"
+        },
+        "detailed": {
+            "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+        },
+        "json": {
+            "()": "utils.json_file_logger.MyJSONFormatter",
+            "fmt_keys": {
+                "level": "levelname",
+                "message": "message",
+                "timestamp": "timestamp",
+                "logger": "name",
+                "module": "module",
+                "function": "funcName",
+                "line": "lineno",
+                "thread_name": "threadName"
+            }
+        }
     },
-    "detailed": {
-      "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
-      "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+    "handlers": {
+        "stderr": {
+            "level": "WARNING",
+            "formatter": "simple",
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr"
+        },
+        "file": {
+            "level": "DEBUG",
+            "formatter": "detailed",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "logs/app.log",
+            "maxBytes": 10485760,
+            "backupCount": 5
+        },
+        "json_file": {
+            "level": "DEBUG",
+            "formatter": "json",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "logs/app.log.jsonl",
+            "maxBytes": 10485760,
+            "backupCount": 5
+        },
+        "stdout": {
+            "()": "rich.logging.RichHandler",
+            "show_path": False,
+            "level": "INFO",
+        }
     },
-    "json": {
-      "()": "utils.json_file_logger.MyJSONFormatter",
-      "fmt_keys": {
-        "level": "levelname",
-        "message": "message",
-        "timestamp": "timestamp",
-        "logger": "name",
-        "module": "module",
-        "function": "funcName",
-        "line": "lineno",
-        "thread_name": "threadName"
-      }
+    "loggers": {
+        "root": {
+            "level": "DEBUG",
+            "handlers": ["stderr", "file", "json_file", "stdout"]
+        }
     }
-  },
-  "handlers": {
-    "stderr": {
-      "level": "WARNING",
-      "formatter": "simple",
-      "class": "logging.StreamHandler",
-      "stream": "ext://sys.stderr"
-    },
-    "file": {
-      "level": "DEBUG",
-      "formatter": "detailed",
-      "class": "logging.handlers.RotatingFileHandler",
-      "filename": "logs/app.log",
-      "maxBytes": 10485760,
-      "backupCount": 5
-    },
-    "json_file": {
-      "level": "DEBUG",
-      "formatter": "json",
-      "class": "logging.handlers.RotatingFileHandler",
-      "filename": "logs/app.log.jsonl",
-      "maxBytes": 10485760,
-      "backupCount": 5
-    },
-    "stdout": {
-      "()": "rich.logging.RichHandler",
-      "show_path": False,
-      "level": "INFO",
-    }
-  },
-  "loggers": {
-    "root": {
-      "level": "DEBUG",
-      "handlers": ["stderr", "file", "json_file", "stdout"]
-    }
-  }
 }
+
+no_rotating_file_dict_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(message)s"
+        },
+        "detailed": {
+            "format": "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+        },
+    },
+    "handlers": {
+        "stderr": {
+            "level": "WARNING",
+            "formatter": "simple",
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr"
+        },
+        "stdout": {
+            "()": "rich.logging.RichHandler",
+            "show_path": False,
+            "level": "INFO",
+        }
+    },
+    "loggers": {
+        "root": {
+            "level": "DEBUG",
+            "handlers": ["stderr", "stdout"]
+        }
+    }
+}
+
+
 def setup_logging():
     """
 
     :return:
     """
-
 
     """
      ___      _               _                ___  _            _                
@@ -107,11 +141,10 @@ def setup_logging():
                                             
     loads json file with logging configuration from resources/logging_configs/config.json
     """
-    #config_file = project_root_path.joinpath("resources", "logging_configs", "config.json")
-    #with open(config_file, "r") as f:
+    # config_file = project_root_path.joinpath("resources", "logging_configs", "config.json")
+    # with open(config_file, "r") as f:
     #   config = json.load(f)
     logging.config.dictConfig(my_dict_config)
-
 
 
 # change working directory to the root of the project
@@ -141,4 +174,3 @@ if __name__ == '__main__':
         1 / 0
     except ZeroDivisionError as e:
         log.exception(e)
-
