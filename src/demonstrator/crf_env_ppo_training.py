@@ -25,6 +25,10 @@ human_factor_data = human_factor
 
 start_timestamp = 1693807200
 step_1_output = cp_solver_output2
+
+RESILIENCE_WEIGHT = 1
+PREFERENCE_WEIGHT = 1
+EXPERIENCE_WEIGHT = 1
 def make_env():
 
 
@@ -35,6 +39,9 @@ def make_env():
         human_factor_data=human_factor_data,
         start_timestamp=start_timestamp,
         allocate_workers_on_the_same_line_if_possible=False,
+        resilience_weight=RESILIENCE_WEIGHT,
+        preference_weight=PREFERENCE_WEIGHT,
+        experience_weight=EXPERIENCE_WEIGHT,
     )
 
     def mask_fn(env: gym.Env) -> np.ndarray:
@@ -54,6 +61,8 @@ model = sb3_contrib.MaskablePPO(MaskableActorCriticPolicy, vec_env, verbose=1, d
 if __name__ == '__main__':
     # Train the agent
     log.info("training the model")
-    model.learn(total_timesteps=1_000)
-    model.save(
-        f"crf_rl_model-action-{vec_env.action_space.shape}_obs-{vec_env.observation.shape}_date-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}")
+    model.learn(total_timesteps=10_000)
+    model.save(f"crf_rl_model-action-{vec_env.action_space.n}_obs-{vec_env.observation_space.shape}"
+               f"_resilience-{RESILIENCE_WEIGHT}"
+               f"_experience-{EXPERIENCE_WEIGHT}"
+               f"_preference-{PREFERENCE_WEIGHT}.zip")

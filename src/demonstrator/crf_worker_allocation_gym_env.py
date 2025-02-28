@@ -600,7 +600,7 @@ class CrfWorkerAllocationEnv(gym.Env):
                 n_visualized += 1
             if n_visualized >= 4:
                 break
-        print(self._worker_to_idx_map)
+        # print(self._worker_to_idx_map)
         print(df[cols_to_display].to_string())
 
     def is_terminal_state(self) -> bool:
@@ -780,11 +780,17 @@ class CrfWorkerAllocationEnv(gym.Env):
         # so we just return the cumulative reward from the current state onwards
         cumulative_reward_from_current_state_onwards = 0
 
+        i = 0
+        self.render()
         while not done:
             best_action = self.best_eager_action()
             _, rew, done, _, _ = self.step(best_action)
             cumulative_reward_from_current_state_onwards += rew
             # print(f"best action: {best_action}, reward: {rew}")
+            i += 1
+            # render every 25 steps
+            if i % 25 == 0:
+                self.render()
 
         experience, resilience, preference = self.get_KPIs()
         weighted_sum = self._preference_weight * preference + self._resilience_weight * resilience + self._experience_weight * experience

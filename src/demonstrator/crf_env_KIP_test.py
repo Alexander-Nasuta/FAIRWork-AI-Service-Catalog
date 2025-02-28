@@ -29,7 +29,5 @@ if __name__ == '__main__':
 
     done = False
     env.greedy_rollout_sparse()
-
-    env.render()
     experience, resilience, preference = env.get_KPIs()
     log.info(f"KPIs: experience={experience:.2f}, resilience={resilience:.2f}, preference={preference:.2f}")

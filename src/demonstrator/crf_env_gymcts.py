@@ -30,7 +30,7 @@ class CrfMCTSWrapper(SoloMCTSGymEnv, gym.Wrapper):
 
     def rollout(self) -> float:
         # return self.env.unwrapped.greedy_rollout_sparse()
-        for _ in range(10):
+        for _ in range(1):
             best_action = self.env.unwrapped.best_eager_action()
             if best_action is not None:
                 self.env.step(best_action)
@@ -57,20 +57,20 @@ env = CrfWorkerAllocationEnv(
     allocate_workers_on_the_same_line_if_possible=False,
 )
 env.reset()
-
 env = CrfMCTSWrapper(env)
 
 if __name__ == '__main__':
     done = False
     agent = SoloMCTSAgent(
         env=env,
-        clear_mcts_tree_after_step=True,
+        clear_mcts_tree_after_step=False,
         render_tree_after_step=True,
         exclude_unvisited_nodes_from_render=True,
-        number_of_simulations_per_step=30,
+        number_of_simulations_per_step=2,
     )
     actions = agent.solve(render_tree_after_step=True)
 
     env.render()
     experience, resilience, preference = env.get_KPIs()
     log.info(f"KPIs: experience={experience:.2f}, resilience={resilience:.2f}, preference={preference:.2f}")
+    env.get_worker_allocation(filter_no_workers_assigned=True)

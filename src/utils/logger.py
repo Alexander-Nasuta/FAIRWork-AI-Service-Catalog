@@ -93,12 +93,6 @@ no_rotating_file_dict_config = {
         },
     },
     "handlers": {
-        "stderr": {
-            "level": "WARNING",
-            "formatter": "simple",
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stderr"
-        },
         "stdout": {
             "()": "rich.logging.RichHandler",
             "show_path": False,
@@ -108,7 +102,7 @@ no_rotating_file_dict_config = {
     "loggers": {
         "root": {
             "level": "DEBUG",
-            "handlers": ["stderr", "stdout"]
+            "handlers": ["stdout"]
         }
     }
 }
@@ -144,7 +138,7 @@ def setup_logging():
     # config_file = project_root_path.joinpath("resources", "logging_configs", "config.json")
     # with open(config_file, "r") as f:
     #   config = json.load(f)
-    logging.config.dictConfig(my_dict_config)
+    logging.config.dictConfig(no_rotating_file_dict_config)
 
 
 # change working directory to the root of the project
