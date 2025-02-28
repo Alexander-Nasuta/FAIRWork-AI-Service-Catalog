@@ -56,4 +56,4 @@ if __name__ == '__main__':
     log.info("training the model")
     model.learn(total_timesteps=1_000)
     model.save(
-        f"crf_rl_model-action-{vec_env.action_space.shape}-obs-{vec_env.observation.shape}-date-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}")
+        f"crf_rl_model-action-{vec_env.action_space.shape}_obs-{vec_env.observation.shape}_date-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}")
