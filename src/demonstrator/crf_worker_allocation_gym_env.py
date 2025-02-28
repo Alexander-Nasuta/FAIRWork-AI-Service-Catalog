@@ -319,7 +319,6 @@ class CrfWorkerAllocationEnv(gym.Env):
         self._n_rows = self._state.shape[0]
         self._n_workers = len(worker_to_idx_map)
 
-        print(state.columns)
 
     def _calculate_reward(
             self,
@@ -339,7 +338,7 @@ class CrfWorkerAllocationEnv(gym.Env):
                 experience, resilience, preference = env.get_KPIs()
                 weighted_sum = self._preference_weight * preference + self._resilience_weight * resilience + self._experience_weight * experience
                 scaled_weighted_sum = weighted_sum / (
-                            self._preference_weight + self._resilience_weight + self._experience_weight)
+                        self._preference_weight + self._resilience_weight + self._experience_weight)
                 return scaled_weighted_sum
             else:
                 return 0
@@ -466,7 +465,7 @@ class CrfWorkerAllocationEnv(gym.Env):
 
             # check if we are in the last interval
             if self.is_terminal_state():
-                print("terminal state reached")
+                # print("terminal state reached")
                 reward = self._calculate_reward(
                     named_worker_tuple=allocated_updated_named_tuple,
                     is_terminal=True,
@@ -745,7 +744,14 @@ class CrfWorkerAllocationEnv(gym.Env):
 
         return experience, resilience, preference
 
-    def best_eager_action(self) -> int:
+    def get_scaled_KPI_score(self) -> float:
+        experience, resilience, preference = self.get_KPIs()
+        weighted_sum = self._preference_weight * preference + self._resilience_weight * resilience + self._experience_weight * experience
+        scaled_weighted_sum = weighted_sum / (
+                self._preference_weight + self._resilience_weight + self._experience_weight)
+        return scaled_weighted_sum
+
+    def best_eager_action(self) -> int | None:
         best_action = None
         best_reward = -np.inf
 
@@ -778,7 +784,7 @@ class CrfWorkerAllocationEnv(gym.Env):
             best_action = self.best_eager_action()
             _, rew, done, _, _ = self.step(best_action)
             cumulative_reward_from_current_state_onwards += rew
-            print(f"best action: {best_action}, reward: {rew}")
+            # print(f"best action: {best_action}, reward: {rew}")
 
         experience, resilience, preference = self.get_KPIs()
         weighted_sum = self._preference_weight * preference + self._resilience_weight * resilience + self._experience_weight * experience

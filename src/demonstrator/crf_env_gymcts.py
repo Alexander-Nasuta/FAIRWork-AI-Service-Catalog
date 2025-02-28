@@ -29,7 +29,13 @@ class CrfMCTSWrapper(SoloMCTSGymEnv, gym.Wrapper):
         return self.env.unwrapped.valid_action_list()
 
     def rollout(self) -> float:
-        return self.env.unwrapped.greedy_rollout_sparse()
+        # return self.env.unwrapped.greedy_rollout_sparse()
+        for _ in range(10):
+            best_action = self.env.unwrapped.best_eager_action()
+            if best_action is not None:
+                self.env.step(best_action)
+
+        return self.env.unwrapped.get_scaled_KPI_score()
 
     def get_state(self) -> pd.DataFrame:
         return env.unwrapped.get_state()
@@ -61,7 +67,7 @@ if __name__ == '__main__':
         clear_mcts_tree_after_step=True,
         render_tree_after_step=True,
         exclude_unvisited_nodes_from_render=True,
-        number_of_simulations_per_step=2,
+        number_of_simulations_per_step=30,
     )
     actions = agent.solve(render_tree_after_step=True)
 
