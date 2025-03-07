@@ -567,7 +567,10 @@ def import_endpoints():
 
 def main() -> None:
     log.info("starting flask app...")
-    app.run(port=8080)
+    app.run(
+        port=8080,
+        threaded=True
+    )
 
 
 if __name__ == '__main__':
