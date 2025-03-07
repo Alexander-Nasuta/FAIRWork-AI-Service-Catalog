@@ -22,9 +22,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
-    - name: Update dependencies
+    - name: Update ortools
       run: |
         pip install -U ortools
+    - name: Update ortools
+      run: |
         pip install -U wandb
     - name: upgrade setuptools
       run: pip3 install --upgrade pip setuptools
