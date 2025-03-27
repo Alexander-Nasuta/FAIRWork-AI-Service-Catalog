@@ -561,6 +561,860 @@ class HybridBalancedExperienceMCTS(Resource):
         return solve_with_mcts(env, n_sim=20)
 
 
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+@ns.route('/hybrid/cp-makespan/cp-balanced')
+class HybridMakespanBalanced(Resource):
+    @ns.doc('/hybrid/cp-makespan/cp-balanced')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=1,
+            experience_weight=1,
+        )
+
+        return solve_with_cp(env)
+
+
+@ns.route('/hybrid/cp-makespan/cp-preference')
+class HybridMakespanPreference(Resource):
+    @ns.doc('/hybrid/cp-makespan/cp-preference')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint for the linear assignment optimizer."""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=0,
+            experience_weight=0,
+        )
+
+        return solve_with_cp(env)
+
+
+@ns.route('/hybrid/cp-makespan/cp-resilience')
+class HybridMakespanResilience(Resource):
+    @ns.doc('/hybrid/cp-makespan/cp-resilience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=0,
+            resilience_weight=1,
+            experience_weight=0,
+        )
+
+        return solve_with_cp(env)
+
+
+@ns.route('/hybrid/cp-makespan/cp-experience')
+class HybridMakespanExperience(Resource):
+    @ns.doc('/hybrid/cp-makespan/cp-experience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=0,
+            resilience_weight=0,
+            experience_weight=1,
+        )
+
+        return solve_with_cp(env)
+
+
+@ns.route('/hybrid/cp-makespan/rl-balanced')
+class HybridMakespanBalancedRL(Resource):
+    @ns.doc('/hybrid/cp-makespan/rl-balanced')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=2,
+            experience_weight=1,
+        )
+
+        return solve_with_rl(env, focus='balance')
+
+
+@ns.route('/hybrid/cp-makespan/rl-preference')
+class HybridMakespanPreferenceRL(Resource):
+    @ns.doc('/hybrid/cp-makespan/rl-preference')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=10,
+            resilience_weight=1,
+            experience_weight=1,
+        )
+
+        return solve_with_rl(env, focus='preference')
+
+
+@ns.route('/hybrid/cp-makespan/rl-resilience')
+class HybridMakespanResilienceRL(Resource):
+    @ns.doc('/hybrid/cp-makespan/rl-resilience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=10,
+            experience_weight=1,
+        )
+
+        return solve_with_rl(env, focus='resilience')
+
+
+@ns.route('/hybrid/cp-makespan/rl-experience')
+class HybridMakespanExperienceRL(Resource):
+    @ns.doc('/hybrid/cp-makespan/rl-experience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=1,
+            experience_weight=10,
+        )
+
+        return solve_with_rl(env, focus='experience')
+
+
+
+@ns.route('/hybrid/cp-makespan/mcts-balanced')
+class HybridMakespanBalancedMCTS(Resource):
+    @ns.doc('/hybrid/cp-makespan/mcts-balanced')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=1,
+            experience_weight=1,
+        )
+
+        return solve_with_mcts(env, n_sim=20)
+
+
+@ns.route('/hybrid/cp-makespan/mcts-preference')
+class HybridMakespanPreferenceMCTS(Resource):
+    @ns.doc('/hybrid/cp-makespan/mcts-preference')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=0,
+            experience_weight=0,
+        )
+
+        return solve_with_mcts(env, n_sim=20)
+
+
+@ns.route('/hybrid/cp-makespan/mcts-resilience')
+class HybridMakespanResilienceMCTS(Resource):
+    @ns.doc('/hybrid/cp-makespan/mcts-resilience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=0,
+            resilience_weight=1,
+            experience_weight=0,
+        )
+
+        return solve_with_mcts(env, n_sim=20)
+
+
+@ns.route('/hybrid/cp-makespan/mcts-experience')
+class HybridMakespanExperienceMCTS(Resource):
+    @ns.doc('/hybrid/cp-makespan/mcts-experience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=1,
+            tardiness_weight=0
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=0,
+            resilience_weight=0,
+            experience_weight=1,
+        )
+
+        return solve_with_mcts(env, n_sim=20)
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+
+@ns.route('/hybrid/cp-tardiness/cp-balanced')
+class HybridMakespanBalanced(Resource):
+    @ns.doc('/hybrid/cp-tardiness/cp-balanced')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=1,
+            experience_weight=1,
+        )
+
+        return solve_with_cp(env)
+
+
+@ns.route('/hybrid/cp-tardiness/cp-preference')
+class HybridMakespanPreference(Resource):
+    @ns.doc('/hybrid/cp-tardiness/cp-preference')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint for the linear assignment optimizer."""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=0,
+            experience_weight=0,
+        )
+
+        return solve_with_cp(env)
+
+
+@ns.route('/hybrid/cp-tardiness/cp-resilience')
+class HybridMakespanResilience(Resource):
+    @ns.doc('/hybrid/cp-tardiness/cp-resilience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=0,
+            resilience_weight=1,
+            experience_weight=0,
+        )
+
+        return solve_with_cp(env)
+
+
+@ns.route('/hybrid/cp-tardiness/cp-experience')
+class HybridMakespanExperience(Resource):
+    @ns.doc('/hybrid/cp-tardiness/cp-experience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=0,
+            resilience_weight=0,
+            experience_weight=1,
+        )
+
+        return solve_with_cp(env)
+
+
+@ns.route('/hybrid/cp-tardiness/rl-balanced')
+class HybridMakespanBalancedRL(Resource):
+    @ns.doc('/hybrid/cp-tardiness/rl-balanced')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=2,
+            experience_weight=1,
+        )
+
+        return solve_with_rl(env, focus='balance')
+
+
+@ns.route('/hybrid/cp-tardiness/rl-preference')
+class HybridMakespanPreferenceRL(Resource):
+    @ns.doc('/hybrid/cp-tardiness/rl-preference')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=10,
+            resilience_weight=1,
+            experience_weight=1,
+        )
+
+        return solve_with_rl(env, focus='preference')
+
+
+@ns.route('/hybrid/cp-tardiness/rl-resilience')
+class HybridMakespanResilienceRL(Resource):
+    @ns.doc('/hybrid/cp-tardiness/rl-resilience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=10,
+            experience_weight=1,
+        )
+
+        return solve_with_rl(env, focus='resilience')
+
+
+@ns.route('/hybrid/cp-tardiness/rl-experience')
+class HybridMakespanExperienceRL(Resource):
+    @ns.doc('/hybrid/cp-tardiness/rl-experience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=1,
+            experience_weight=10,
+        )
+
+        return solve_with_rl(env, focus='experience')
+
+
+
+@ns.route('/hybrid/cp-tardiness/mcts-balanced')
+class HybridMakespanBalancedMCTS(Resource):
+    @ns.doc('/hybrid/cp-tardiness/mcts-balanced')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=1,
+            experience_weight=1,
+        )
+
+        return solve_with_mcts(env, n_sim=20)
+
+
+@ns.route('/hybrid/cp-tardiness/mcts-preference')
+class HybridMakespanPreferenceMCTS(Resource):
+    @ns.doc('/hybrid/cp-tardiness/mcts-preference')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=1,
+            resilience_weight=0,
+            experience_weight=0,
+        )
+
+        return solve_with_mcts(env, n_sim=20)
+
+
+@ns.route('/hybrid/cp-tardiness/mcts-resilience')
+class HybridMakespanResilienceMCTS(Resource):
+    @ns.doc('/hybrid/cp-tardiness/mcts-resilience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=0,
+            resilience_weight=1,
+            experience_weight=0,
+        )
+
+        return solve_with_mcts(env, n_sim=20)
+
+
+@ns.route('/hybrid/cp-tardiness/mcts-experience')
+class HybridMakespanExperienceMCTS(Resource):
+    @ns.doc('/hybrid/cp-tardiness/mcts-experience')
+    @ns.expect(request_body_model)
+    @ns.marshal_with(response_crf_body_model)
+    def post(self):
+        """ Endpoint"""
+
+        allocations_dict = _perform_order_to_line_mapping(
+            api_payload=api.payload,
+            makespan_weight=0,
+            tardiness_weight=1
+        )
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
+        worker_availabilities = api.payload["availabilities"]
+        geometry_line_mapping = api.payload["geometry_line_mapping"]
+        human_factor_data = api.payload["human_factor"]
+
+        env = CrfWorkerAllocationEnv(
+            previous_step_output=allocations_dict,
+            worker_availabilities=worker_availabilities,
+            geometry_line_mapping=geometry_line_mapping,
+            human_factor_data=human_factor_data,
+            start_timestamp=start_timestamp,
+            allocate_workers_on_the_same_line_if_possible=False,
+            preference_weight=0,
+            resilience_weight=0,
+            experience_weight=1,
+        )
+
+        return solve_with_mcts(env, n_sim=20)
+
+########################################################################################################################
+
+
+
+
 def import_endpoints():
     return app
 
