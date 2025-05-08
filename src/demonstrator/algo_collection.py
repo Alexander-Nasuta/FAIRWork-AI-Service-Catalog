@@ -279,8 +279,91 @@ def _perform_order_to_line_mapping(
     log.info(pprint.pformat(remapped_solution_dict))
     return remapped_solution_dict
 
+def _get_setuptime_mapping(
+        api_payload: dict,
+) -> list[dict[str, int | Any]]:
+    instance = api_payload
 
-def solve_with_cp(env: CrfWorkerAllocationEnv) -> dict:
+    # static data
+    geometry_line_mapping = instance["geometry_line_mapping"]
+
+    # create a lookup table for geometry to lines and geometry to primary line
+    geometry_to_lines_lookup_dict = {}
+
+    for elem in geometry_line_mapping:
+        geometry = elem["geometry"]
+        main_line = elem["main_line"]
+        lines = [main_line] + [
+            line for line
+            in elem["alternative_lines"]
+            if line not in ["", "NA", "pomigl."]
+        ]
+        geometry_to_lines_lookup_dict[geometry] = lines
+        # geometry_main_line_lookup_dict[geometry] = main_line
+
+    def _get_lines_for_geometry(geometry: str):
+        try:
+            return geometry_to_lines_lookup_dict[geometry]
+        except KeyError:
+            return []
+
+    # look up all possible lines to produce an order_data element
+    temp = []
+    for order_data_elem in instance["order_data"]:
+        geometry = order_data_elem["geometry"]
+        possible_lines = _get_lines_for_geometry(geometry)
+        for line in possible_lines:
+            temp.append(order_data_elem | {"line": line})
+
+    # filter out lines not relevant lines (specified in the request)
+    try:
+        relevant_lines = instance["perform_allocation_for_lines"]
+    except KeyError:
+        relevant_lines = []
+
+    if len(relevant_lines):
+        log.debug(f"filtering out line not relevant lines. relevant lines:{relevant_lines}")
+        temp = [elem for elem in temp if elem["line"] in relevant_lines]
+
+
+    # create Task field. Task is the pair of order and geometry
+    # This is basically the 'order' for the solver. The cp solver assumes that there is only one geometry per order,
+    # which turn out to not be the case. By introducing the 'Task' can omit rewriting the solver.
+    set_uptime_map_in_seconds = {}
+    for elem in temp:
+        elem["Task"] = f"{elem['order']} × {elem['geometry']}"
+        set_uptime_map_in_seconds[elem["Task"]] = elem["mold"] * 15 * 60 # 15 minutes per mold
+
+    return set_uptime_map_in_seconds
+
+
+def _get_task_total_amount_mapping(
+    api_payload: dict,
+) -> dict:
+    instance = api_payload
+    mapping = {}
+    for order_data_elem in instance["order_data"]:
+        geometry = order_data_elem["geometry"]
+        order = order_data_elem["order"]
+        amount = order_data_elem["amount"]
+        mapping[f"{order} × {geometry}"] = amount
+    return mapping
+
+
+def timezone_shift(
+        allocation_with_worker_data: list[dict[str, Any]],
+        time_offset_in_hours: int = 2,
+) -> list[dict[str, Any]]:
+
+    for elem in allocation_with_worker_data:
+        elem["Start"] += time_offset_in_hours * 3600
+        elem["Finish"] += time_offset_in_hours * 3600
+
+    return allocation_with_worker_data
+
+
+
+def solve_with_cp(env: CrfWorkerAllocationEnv, api_payload) -> dict:
     # placeholder for now until the function is implemented
     # do a greedy rollout for now
     env.reset()
@@ -288,6 +371,12 @@ def solve_with_cp(env: CrfWorkerAllocationEnv) -> dict:
 
     allocation_with_worker_data = env.get_worker_allocation()
     experience, resilience, preference = env.get_KPIs()
+
+    # postprocess the allocation
+    allocation_with_worker_data = timezone_shift(allocation_with_worker_data, time_offset_in_hours=2)
+
+    # add mold changes
+    setup_time_mapping = _get_setuptime_mapping(api_payload)
 
     return {
         "experience": experience,

@@ -316,6 +316,24 @@ output_crf_allocation_list_element = api.model('OutputCrfAllocationListElement',
     'required_workers': fields.Integer(required=True, description=''),
 
     'workers': fields.List(fields.String, required=False, example=["line 17"], description=""),
+
+    "is_setup_timebox": fields.Integer(required=True, example=1,
+                                       description="A boolean that indicates if time-interval is meant to be used for setting up the molds of the machine/line."
+                                                   "1 means, that the time interval is meant for setting up the molds of the machine/line."
+                                                   "No production is possible during this time."
+                                                   "0 means, that production is happening during this time."),
+
+    "produced_amount": fields.Integer(required=True, example=100,
+                                      description="The amount of produced items during the time interval."),
+
+    "produced_until_now": fields.Integer(required=True, example=100,
+                                         description="The amount of produced items until now."),
+
+    "warning": fields.String(required=False, example="",
+                             description="A warning message that indicates if there are too few workers assigned to the task."),
+
+    "order_total_amount": fields.Integer(required=True, example=100,
+                                            description="The total amount of items that need to be produced for the order."),
 })
 
 response_crf_body_model = api.model(
@@ -332,6 +350,7 @@ response_crf_body_model = api.model(
 
         "allocations": fields.List(required=True, description='',
                                    cls_or_instance=fields.Nested(output_crf_allocation_list_element)),
+
     },
 )
 

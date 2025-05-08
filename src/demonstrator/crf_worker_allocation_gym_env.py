@@ -14,12 +14,124 @@ from utils.logger import log
 from typing import Any, SupportsFloat, List, Tuple, Hashable
 
 from demonstrator.crf_step_two_input import (cp_solver_output, cp_solver_output2, worker_availabilities,
-                                             geometry_line_mapping, human_factor)
+                                             geometry_line_mapping, human_factor, order_data, throughput_mapping)
 
 worker_decision_variables = namedtuple(
     'WorkerVars',
     ['available', 'medical_condition', 'preference', 'resilience', 'experience', 'allocated']
 )
+
+
+def get_throughput(
+        throughput_mapping: list[dict[str, Any]],
+        geometry: str,
+        line: str,
+        fallback_throughput: int = 300
+):
+    throughput_in_units_per_hour = None
+    for elem in throughput_mapping:
+        if elem["line"] == line and elem["geometry"] == geometry:
+            throughput_in_units_per_hour = elem["throughput"]
+            break
+    if throughput_in_units_per_hour is None:
+        throughput_in_units_per_hour = fallback_throughput
+    if throughput_in_units_per_hour == 0:
+        throughput_in_units_per_hour = fallback_throughput
+
+    return throughput_in_units_per_hour
+
+
+def get_task_total_amount_mapping(
+        order_data: list,
+) -> dict:
+    mapping = {}
+    for order_data_elem in order_data:
+        geometry = order_data_elem["geometry"]
+        order = order_data_elem["order"]
+        amount = order_data_elem["amount"]
+        mapping[f"{order} × {geometry}"] = amount
+    return mapping
+
+
+def get_setuptime_mapping(
+        geometry_line_mapping: list,
+        order_data: list,
+) -> dict:
+    # create a lookup table for geometry to lines and geometry to primary line
+    geometry_to_lines_lookup_dict = {}
+
+    for elem in geometry_line_mapping:
+        geometry = elem["geometry"]
+        main_line = elem["main_line"]
+        lines = [main_line] + [
+            line for line
+            in elem["alternative_lines"]
+            if line not in ["", "NA", "pomigl."]
+        ]
+        geometry_to_lines_lookup_dict[geometry] = lines
+        # geometry_main_line_lookup_dict[geometry] = main_line
+
+    def _get_lines_for_geometry(geometry: str):
+        try:
+            return geometry_to_lines_lookup_dict[geometry]
+        except KeyError:
+            return []
+
+    # look up all possible lines to produce an order_data element
+    temp = []
+    for order_data_elem in order_data:
+        geometry = order_data_elem["geometry"]
+        possible_lines = _get_lines_for_geometry(geometry)
+        for line in possible_lines:
+            temp.append(order_data_elem | {"line": line})
+
+    # create Task field. Task is the pair of order and geometry
+    # This is basically the 'order' for the solver. The cp solver assumes that there is only one geometry per order,
+    # which turn out to not be the case. By introducing the 'Task' can omit rewriting the solver.
+    set_uptime_map_in_minutes = {}
+    for elem in temp:
+        elem["Task"] = f"{elem['order']} × {elem['geometry']}"
+        set_uptime_map_in_minutes[elem["Task"]] = elem["mold"] * 15  # 15 minutes per mold
+
+    return set_uptime_map_in_minutes
+
+
+def validate_interval_data(data):
+    task = data['Task']
+    interval_start = data['Start']
+    interval_end = data['Finish']
+    interval_duration = data['_interval_duration']
+    _setup_time = data['_setup_time']
+    _setup_time_within_timebox = data['_setup_time_within_timebox']
+    _is_completely_setup = data['_is_completely_setup']
+    is_setup_timebox = data['is_setup_timebox']
+    produced_amount = data['produced_amount']
+    produced_amount_until_now = data['produced_until_now']
+    total_amount = data['total_amount']
+
+    # Assert interval start and end times
+    assert interval_start < interval_end, "Interval start must be less than interval end"
+    assert interval_duration > 0, "Interval duration must be greater than 0"
+    assert interval_duration == interval_end - interval_start, "Interval duration must match the difference between start and end"
+
+    # Assert setup time consistency
+    assert _setup_time >= _setup_time_within_timebox, "_setup_time must be greater than or equal to _setup_time_within_timebox"
+    assert _setup_time_within_timebox >= 0, "_setup_time_within_timebox must be non-negative"
+
+    if _is_completely_setup:
+        assert is_setup_timebox == 1
+        assert interval_duration == _setup_time_within_timebox, "If completely setup, interval duration must equal setup time within timebox"
+        assert produced_amount == 0, "If completely setup, produced amount must be 0"
+        assert produced_amount_until_now == 0, "If completely setup, produced amount until now must be 0"
+
+    if is_setup_timebox and not _is_completely_setup:
+        assert produced_amount > 0, "If setup timebox, produced amount must be greater than 0"
+        assert produced_amount_until_now == produced_amount, "If setup timebox, produced amount until now must equal produced amount"
+        assert total_amount >= produced_amount_until_now, "Total amount must be greater than or equal to produced amount until now"
+
+    if not is_setup_timebox:
+        assert produced_amount > 0, "If not setup timebox, produced amount must be greater than 0"
+        assert produced_amount_until_now <= total_amount, "Produced amount until now must be less than or equal to total amount"
 
 
 class CrfWorkerAllocationEnv(gym.Env):
@@ -36,12 +148,14 @@ class CrfWorkerAllocationEnv(gym.Env):
                  worker_availabilities: list[dict[str, Any]],
                  geometry_line_mapping: list[dict[str, Any]],
                  human_factor_data: dict[str, Any],
+                 order_data: list[dict[str, Any]],
                  start_timestamp: int,
                  dense_reward: bool = True,
                  preference_weight: float = 1.0,
                  resilience_weight: float = 1.0,
                  experience_weight: float = 1.0,
                  allocate_workers_on_the_same_line_if_possible: bool = True,
+                 throughput_mapping: list[dict[str, Any]] = throughput_mapping,
                  ):
 
         df_state = self._init_state_dataframe(
@@ -50,6 +164,7 @@ class CrfWorkerAllocationEnv(gym.Env):
             geometry_line_mapping=geometry_line_mapping,
             human_factor_data=human_factor_data,
             start_timestamp=start_timestamp,
+            order_data=order_data,
         )
 
         # will be set by load_state
@@ -104,6 +219,7 @@ class CrfWorkerAllocationEnv(gym.Env):
                               geometry_line_mapping: list[dict[str, Any]],
                               human_factor_data: dict[str, Any],
                               start_timestamp: int,
+                              order_data: list[dict[str, Any]],
                               ) -> pd.DataFrame:
 
         line_allocations = previous_step_output
@@ -130,6 +246,26 @@ class CrfWorkerAllocationEnv(gym.Env):
             start_timestamp=start_timestamp,
         )
         log.info(f"relevant_intervals: {relevant_intervals}")
+
+        # get mapping for setup time
+        setup_time_mapping = get_setuptime_mapping(
+            geometry_line_mapping=geometry_line_mapping,
+            order_data=order_data,
+        )
+        # remaining setup time
+        remaining_setup_time_mapping = copy.deepcopy(setup_time_mapping)
+
+        # get mapping for task total amount
+        task_total_amount_mapping = get_task_total_amount_mapping(
+            order_data=order_data,
+        )
+
+        # produced amount mapping
+        # maps the same key as task_total_amount_mapping
+        # it will be incremented by the produced amount while in the loops below
+        produced_amount_mapping = {}
+        for key in task_total_amount_mapping.keys():
+            produced_amount_mapping[key] = 0
 
         df_data = []
         for interval_idx, (interval_start, interval_end) in enumerate(relevant_intervals):
@@ -160,11 +296,133 @@ class CrfWorkerAllocationEnv(gym.Env):
                 log.debug(f"required workers for line '{line_elem['Resource']}' and geometry '{line_elem['geometry']}' "
                           f"is {required_workers}.")
 
+                interval_duration = interval_end - interval_start
+
+                task = line_elem['Task']
+
+                _is_completely_setup = 0
+                _setup_time_within_timebox = -1
+                production_time = -1
+                produced_amount = 0
+
+                _setup_time = setup_time_mapping[line_elem['Task']]
+
+                # check if the interval is used for setup
+                if remaining_setup_time_mapping[task] > 0:
+                    is_setup_timebox = 1
+
+                    # decrease the remaining setup time
+                    remaining_setup_time_mapping[task] -= interval_duration
+
+                    if remaining_setup_time_mapping[task] >= 0:
+                        _is_completely_setup = 1
+                        _setup_time_within_timebox = interval_duration
+
+                        assert _setup_time >= _setup_time_within_timebox
+                        assert _setup_time_within_timebox >= 0
+
+                        production_time = 0
+                    else:
+                        # note that remaining_setup_time_mapping[task] is negative
+                        _setup_time_within_timebox = interval_duration + remaining_setup_time_mapping[task]
+                        print(f"setup time: {_setup_time}")
+                        print(
+                            f"setup time within timebox: {_setup_time_within_timebox}, remaining setup time: {remaining_setup_time_mapping[task]}, interval duration: {interval_duration}")
+                        assert _setup_time_within_timebox >= 0
+                        assert _setup_time >= _setup_time_within_timebox
+
+                        production_time = interval_duration - _setup_time_within_timebox
+
+                        assert production_time <= interval_duration
+
+                else:
+                    is_setup_timebox = 0
+                    _setup_time_within_timebox = 0
+                    production_time = interval_duration
+
+                    assert _setup_time >= _setup_time_within_timebox
+                    assert _setup_time_within_timebox >= 0
+
+                if _is_completely_setup == 0:
+                    if is_setup_timebox:
+                        assert _setup_time_within_timebox < interval_duration
+                        assert production_time < interval_duration, f"production time should be smaller than interval duration, " \
+                                                                    f"but is {production_time} >= {interval_duration} for task {task} and interval {interval_idx}"
+                    else:
+                        assert _setup_time_within_timebox == 0
+                        assert production_time == interval_duration, f"production time should be equal to interval duration, " \
+                                                                     f"but is {production_time} != {interval_duration} for task {task} and interval {interval_idx}"
+                else:
+                    assert _setup_time_within_timebox == interval_duration
+                    assert production_time == 0, f"production time should be 0, but is {production_time} for task {task} and interval {interval_idx}"
+
+                if production_time:
+                    throughput_in_units_per_hour = get_throughput(
+                        throughput_mapping=throughput_mapping,
+                        geometry=line_elem['geometry'],
+                        line=line_elem['Resource'],
+                    )
+                    assert throughput_in_units_per_hour > 0
+                    # note: production time is in minutes
+                    produced_amount = throughput_in_units_per_hour * production_time / 60
+                    assert produced_amount >= 0
+                    assert produced_amount <= task_total_amount_mapping[task]
+                else:
+                    produced_amount = 0
+
+                if _is_completely_setup == 1:
+                    assert produced_amount == 0, f"produced amount should be 0, but is {produced_amount} for task {task} and interval {interval_idx}"
+                else:
+                    assert produced_amount > 0, f"produced amount should be greater than 0, but is {produced_amount} for task {task} and interval {interval_idx}"
+
+                if is_setup_timebox == 1:
+                    assert produced_amount < throughput_in_units_per_hour * interval_duration / 60
+
+                # increment the produced amount mapping
+                produced_amount_mapping[task] += produced_amount
+
+                produced_amount_until_now = produced_amount_mapping[task]
+
+                assert produced_amount_until_now <= task_total_amount_mapping[task], \
+                    f"produced amount until now should be smaller than total amount, " \
+                    f"but is {produced_amount_until_now} > {task_total_amount_mapping[task]} for task {task} and interval {interval_idx}"
+
+                assert produced_amount_until_now >= produced_amount, \
+                    f"produced amount until now should be greater than produced amount, " \
+                    f"but is {produced_amount_until_now} < {produced_amount} for task {task} and interval {interval_idx}"
+
+                if _is_completely_setup == 1:
+                    assert produced_amount == 0, f"produced amount should be 0, but is {produced_amount} for task {task} and interval {interval_idx}"
+                    assert produced_amount_until_now == 0, \
+                        f"produced amount until now should be 0, " \
+                        f"but is {produced_amount_until_now} for task {task} and interval {interval_idx}"
+                    assert interval_duration == _setup_time_within_timebox
+                else:
+                    assert produced_amount > 0, f"produced amount should be greater than 0, but is {produced_amount} for task {task} and interval {interval_idx}"
+                    if is_setup_timebox == 1:
+                        assert produced_amount == produced_amount_until_now, \
+                            f"produced amount should be equal to produced amount until now, " \
+                            f"but is {produced_amount} != {produced_amount_until_now} for task {task} and interval {interval_idx}"
+
+                if _setup_time_within_timebox > 0:
+                    assert is_setup_timebox == 1, f"setup time within timebox should be greater than 0, " \
+                                                  f"but is {_setup_time_within_timebox} for task {task} and interval {interval_idx}"
+                    assert _setup_time_within_timebox <= interval_duration, \
+                        f"setup time within timebox should be smaller than interval duration, " \
+                        f"but is {_setup_time_within_timebox} > {interval_duration} for task {task} and interval {interval_idx}"
+                    assert produced_amount_until_now == produced_amount
+
+                assert interval_start < interval_end
+                assert interval_duration > 0
+                assert interval_duration == interval_end - interval_start
+
                 data_row_dict = {
                     'interval_no': interval_idx,
                     'is_current_interval': 1 if interval_idx == 0 else 0,
                     'interval_start': interval_start,
+                    'Start': interval_start,
                     'interval_end': interval_end,
+                    'Finish': interval_end,
                     'Task': line_elem['Task'],
                     'Task_interval': f"{line_elem['Task']} × Interval {interval_idx}",
                     # todo: check if timstamp is needed instead of interval idx
@@ -174,7 +432,18 @@ class CrfWorkerAllocationEnv(gym.Env):
                     'allocated_workers': 0,
                     'required_workers_met': 0,
                     'row_done': 0,
+
+                    'total_amount': task_total_amount_mapping[line_elem['Task']],
+                    'produced_amount': produced_amount,
+                    'produced_until_now': produced_amount_until_now,
+                    # 'timebox_amount': 0, # Note: this will be calculated once the environment is solved
+                    '_setup_time': _setup_time,  # the overall setup time (all timeboxes summed up)
+                    '_interval_duration': interval_duration,  # the duration of this timebox
+                    '_setup_time_within_timebox': _setup_time_within_timebox,  # the setup time within this timebox
+                    '_is_completely_setup': _is_completely_setup,
+                    'is_setup_timebox': is_setup_timebox,
                 }
+                # validate_interval_data(data=data_row_dict)
                 n_workers_available_for_this_task = 0
                 for worker_in_interval in workers_within_interval:
                     worker_id = worker_in_interval['worker']
@@ -195,9 +464,28 @@ class CrfWorkerAllocationEnv(gym.Env):
                     data_row_dict = data_row_dict | {
                         f'worker_{worker_id}': res
                     }
+
                 df_data.append(data_row_dict)
 
         df = pd.DataFrame(df_data)
+
+        # sanity checks
+
+        # check if "_setup_time_within_timebox" adds up to "_setup_time" for each task
+        for task in setup_time_mapping.keys():
+            assert df[df['Task'] == task]['_setup_time_within_timebox'].sum() == setup_time_mapping[task], \
+                f"setup time within timebox does not add up to setup time for task {task}"
+
+        # check if "produced_amount" adds up to "total_amount" for each task
+        # only check task present in the dataframe:
+        tasks = df['Task'].unique()
+        for task in tasks:
+            ratio = df[df['Task'] == task]['produced_amount'].sum() / task_total_amount_mapping[task]
+            log.debug(
+                f"produced amount for task '{task}': {df[df['Task'] == task]['produced_amount'].sum()}, expected: {task_total_amount_mapping[task]}, ratio: {ratio}")
+            assert df[df['Task'] == task]['produced_amount'].sum() == task_total_amount_mapping[task], \
+                f"produced amount does not add up to total amount for task {task}"
+
         return df
 
     @staticmethod
@@ -318,7 +606,6 @@ class CrfWorkerAllocationEnv(gym.Env):
 
         self._n_rows = self._state.shape[0]
         self._n_workers = len(worker_to_idx_map)
-
 
     def _calculate_reward(
             self,
@@ -516,6 +803,13 @@ class CrfWorkerAllocationEnv(gym.Env):
             is_terminal=is_terminal,
             row_done_without_meeting_required_workers_penalty=row_done_without_meeting_required_workers_penalty
         )
+
+        # validate all rows of the state dict with validate_interval_data(
+        #                     data=data_row_dict
+        #                 )
+        #for row_idx, row in self._state.iterrows():
+        #   validate_interval_data(data=row.to_dict())
+
         return self._state_as_numpy_array(), nested_reward + reward, is_terminal, False, {}
 
     def reset(self, **kwargs) -> (npt.NDArray, dict[str, Any]):
@@ -799,6 +1093,9 @@ class CrfWorkerAllocationEnv(gym.Env):
         return scaled_weighted_sum
 
     def get_worker_allocation(self, filter_no_workers_assigned=False) -> list[dict]:
+        #for row_idx, row in self._state.iterrows():
+        #   validate_interval_data(data=row.to_dict())
+
         allocations = []
         for row_idx, row in self._state.iterrows():
 
@@ -811,24 +1108,157 @@ class CrfWorkerAllocationEnv(gym.Env):
             allocated_workers = [worker.replace('worker_', '') for worker in allocated_workers]
 
             allocation_element = {
-                "Start": solver_time_to_timestamp(row['interval_start'], self._start_timestamp),
-                "_Start_human_readable": self._human_readable_timestamp(
-                    solver_time_to_timestamp(row['interval_start'], self._start_timestamp)),
-                "Finish": solver_time_to_timestamp(row['interval_end'], self._start_timestamp),
-                "_Finish_human_readable": self._human_readable_timestamp(
-                    solver_time_to_timestamp(row['interval_end'], self._start_timestamp)),
+                "Start": row['interval_start'],
+                # "_Start_human_readable": self._human_readable_timestamp(
+                #   solver_time_to_timestamp(row['interval_start'], self._start_timestamp)),
+                "Finish": row['interval_end'],
+                # "_Finish_human_readable": self._human_readable_timestamp(
+                #   solver_time_to_timestamp(row['interval_end'], self._start_timestamp)),
                 "Resource": row['line'],
                 "Task": row['Task'],
                 "geometry": row['geometry'],
                 "order": row['Task'].split(' × ')[0],
                 "required_workers": row['required_workers'],
-                "workers": allocated_workers
+                "workers": allocated_workers,
+
+                'total_amount': row['total_amount'],
+                'produced_amount': row['produced_amount'],
+                'produced_until_now': row['produced_until_now'],
+
+                '_setup_time': row['_setup_time'],  # the overall setup time (all timeboxes summed up)
+                '_interval_duration': row['_interval_duration'],  # the duration of this timebox
+                # the overall setup time (all timeboxes summed up)
+                '_setup_time_within_timebox': row['_setup_time_within_timebox'],
+                '_is_completely_setup': row['_is_completely_setup'],
+                'is_setup_timebox': row['is_setup_timebox'],
+
             }
+            print(pprint.pformat(allocation_element))
             if filter_no_workers_assigned and len(allocated_workers) == 0:
                 continue
 
+            # validate_interval_data(data=allocation_element)
+
             allocations.append(allocation_element)
 
+        # allocations = list(merged_allocations.values())
+
+        # split allocations with  'is_setup_timebox': 1 into two allocations
+        splited_allocations = []
+        for allocation in allocations:
+
+            if allocation['is_setup_timebox'] == 0:
+                splited_allocations.append(allocation)
+                continue
+
+            # only allocations with 'is_setup_timebox' == 1 are making it into the code below
+
+            if allocation['_is_completely_setup'] == 1:
+                splited_allocations.append(allocation)
+                continue
+
+            if allocation['_setup_time_within_timebox'] == 0:
+                splited_allocations.append(allocation)
+                continue
+
+            if allocation['_setup_time_within_timebox'] > 0:
+                setup_allocation = allocation.copy()
+
+                setup_allocation_start_time = allocation['Start']
+                setup_allocation_end_time = setup_allocation_start_time + allocation['_setup_time_within_timebox']
+                setup_allocation = setup_allocation | {
+                    'Start': setup_allocation_start_time,
+                    'Finish': setup_allocation_end_time,
+                    '_interval_duration': allocation['_setup_time_within_timebox'],
+                    'produced_amount': 0,
+                    'produced_until_now': 0,
+                    'is_setup_timebox': 1,
+                    '_is_completely_setup': 1,
+                }
+
+                # validate_interval_data(setup_allocation)
+
+                splited_allocations.append(setup_allocation)
+
+                procuction_allocation = allocation.copy()
+                procuction_allocation = procuction_allocation | {
+                    'Start': setup_allocation_end_time,
+                    'Finish': allocation['Finish'],
+                    '_interval_duration': allocation['_interval_duration'] - allocation['_setup_time_within_timebox'],
+                    'produced_amount': allocation['produced_amount'],
+                    'produced_until_now': allocation['produced_until_now'],
+                    'is_setup_timebox': 0,
+                    '_setup_time_within_timebox': 0,
+                    '_is_completely_setup': 0,
+                }
+
+                # validate_interval_data(procuction_allocation)
+
+                splited_allocations.append(procuction_allocation)
+
+                continue
+
+            raise ValueError(
+                f"allocation {allocation} has is_setup_timebox == 1, but _is_completely_setup == 0 and _setup_time_within_timebox == 0")
+
+        allocations = splited_allocations
+
+        # merge allocation elements with the same 'Task' and 'workers' values, IF THEY ARE ADJACENT
+        # adjacent means that the finish time of the first allocation is equal to the start time of the second allocation
+        # in that case we take the earliest start time and the latest finish time
+
+        # sort the allocation first by task then by start time
+        allocations.sort(key=lambda x: (x['Task'], x['Start']))
+
+        done = False
+
+        while not done:
+            for prev, curr in zip(allocations[:], allocations[1:]):
+                # merge if
+                #   1. task is the same
+                #   2. _is_completely_setup is not 1
+                #   3. workers are the same
+                #   4. start time of the current allocation is equal to the finish time of the previous allocation
+                if prev['Task'] == curr['Task']:
+                    continue
+                if prev['_is_completely_setup'] == 1:
+                    continue
+                if tuple(prev['workers']) != tuple(curr['workers']):
+                    continue
+                if prev['Finish'] != curr['Start']:
+                    continue
+                # merge allocations
+                # take prev as the base
+                merged_allocation= prev.copy()
+                merged_allocation['Finish'] = curr['Finish']
+                merged_allocation['_interval_duration'] += curr['_interval_duration']
+                merged_allocation['produced_amount'] += curr['produced_amount']
+                merged_allocation['produced_until_now'] = curr['produced_until_now']
+
+                # validate_interval_data(merged_allocation)
+
+                # replace prev with merged_allocation
+                allocations[allocations.index(prev)] = merged_allocation
+                # remove curr from allocations
+                allocations.remove(curr)
+
+                break
+            else:
+                done = True
+
+
+        # map to timestamp domain
+        # do i two hours offset, because consumer api is in UTC+2
+        offset = 2 * 3600
+        [
+            allocation.update({
+                # "Start": solver_time_to_timestamp(allocation['Start'], self._start_timestamp) + offset,
+                # "Finish": solver_time_to_timestamp(allocation['Finish'], self._start_timestamp) + offset,
+                "warning": "Too few workers assigned" if len(allocation['workers']) < allocation[
+                    'required_workers'] else None,
+                "order_total_amount": allocation['total_amount'],
+            }) for allocation in allocations
+        ]
         return allocations
 
 
@@ -843,6 +1273,8 @@ if __name__ == '__main__':
     worker_availabilities = worker_availabilities
     geometry_line_mapping = geometry_line_mapping
     human_factor_data = human_factor
+    order_data = order_data
+    throughput_mapping = throughput_mapping
 
     env = CrfWorkerAllocationEnv(
         previous_step_output=step_1_output['allocations'],
@@ -851,6 +1283,9 @@ if __name__ == '__main__':
         human_factor_data=human_factor_data,
         start_timestamp=start_timestamp,
         allocate_workers_on_the_same_line_if_possible=False,
+
+        order_data=order_data,
+        throughput_mapping=throughput_mapping,
     )
 
     env.render()
