@@ -853,7 +853,7 @@ class CrfWorkerAllocationEnv(gym.Env):
 
         # Expand each tuple column into separate columns
         for col in tuple_columns:
-            expanded_df = df[col].apply(pd.Series)
+            expanded_df = pd.concat([pd.Series(v) for v in df[col]], axis=1).T
             expanded_df.columns = [f'{col}_{i}' for i in range(expanded_df.shape[1])]
             df = pd.concat([df.drop(columns=[col]), expanded_df], axis=1)
 
