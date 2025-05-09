@@ -325,9 +325,9 @@ class CrfWorkerAllocationEnv(gym.Env):
                     else:
                         # note that remaining_setup_time_mapping[task] is negative
                         _setup_time_within_timebox = interval_duration + remaining_setup_time_mapping[task]
-                        print(f"setup time: {_setup_time}")
-                        print(
-                            f"setup time within timebox: {_setup_time_within_timebox}, remaining setup time: {remaining_setup_time_mapping[task]}, interval duration: {interval_duration}")
+                        #print(f"setup time: {_setup_time}")
+                        #print(
+                        #   f"setup time within timebox: {_setup_time_within_timebox}, remaining setup time: {remaining_setup_time_mapping[task]}, interval duration: {interval_duration}")
                         assert _setup_time_within_timebox >= 0
                         assert _setup_time >= _setup_time_within_timebox
 
@@ -1133,7 +1133,7 @@ class CrfWorkerAllocationEnv(gym.Env):
                 'is_setup_timebox': row['is_setup_timebox'],
 
             }
-            print(pprint.pformat(allocation_element))
+            #print(pprint.pformat(allocation_element))
             if filter_no_workers_assigned and len(allocated_workers) == 0:
                 continue
 

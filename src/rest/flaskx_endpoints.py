@@ -157,7 +157,7 @@ class CrfCpOptimizerTardinessAndMakespanEndpoint(Resource):
             "allocations": allocations_dict,
         }
 
-        print(repr(res))
+        #print(repr(res))
 
         return res
 
