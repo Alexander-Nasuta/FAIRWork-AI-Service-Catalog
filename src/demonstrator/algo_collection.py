@@ -51,6 +51,7 @@ class CrfMCTSWrapper(SoloMCTSGymEnv, gym.Wrapper):
 
 def _perform_order_to_line_mapping(
         api_payload: dict,
+        start_time_timestamp: int,
         makespan_weight: int = 1,
         tardiness_weight: int = 1
 ) -> list[dict[str, int | Any]]:
@@ -151,7 +152,7 @@ def _perform_order_to_line_mapping(
     ]
 
     # map deadline timestamps to solver time domain
-    start_time_timestamp = instance["start_time_timestamp"]
+    # start_time_timestamp = instance["start_time_timestamp"]
     log_time(start_time_timestamp, "start time: ")
     temp = [
         elem | {
@@ -350,30 +351,15 @@ def _get_task_total_amount_mapping(
     return mapping
 
 
-def timezone_shift(
-        allocation_with_worker_data: list[dict[str, Any]],
-        time_offset_in_hours: int = 2,
-) -> list[dict[str, Any]]:
-
-    for elem in allocation_with_worker_data:
-        elem["Start"] += time_offset_in_hours * 3600
-        elem["Finish"] += time_offset_in_hours * 3600
-
-    return allocation_with_worker_data
-
-
 
 def solve_with_cp(env: CrfWorkerAllocationEnv, api_payload) -> dict:
-    # placeholder for now until the function is implemented
-    # do a greedy rollout for now
+    # do greedy rollout for now
     env.reset()
     env.greedy_rollout_sparse()
 
     allocation_with_worker_data = env.get_worker_allocation()
     experience, resilience, preference = env.get_KPIs()
 
-    # postprocess the allocation
-    allocation_with_worker_data = timezone_shift(allocation_with_worker_data, time_offset_in_hours=2)
 
     # add mold changes
     setup_time_mapping = _get_setuptime_mapping(api_payload)

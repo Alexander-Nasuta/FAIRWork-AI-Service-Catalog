@@ -154,6 +154,7 @@ os.chdir(project_root_path)
 setup_logging()
 log = logging.getLogger("AI-Service")
 log.info(f"working directory: {os.getcwd()}")
+log.setLevel(logging.DEBUG)  # Set the logger to DEBUG level
 
 if __name__ == '__main__':
 

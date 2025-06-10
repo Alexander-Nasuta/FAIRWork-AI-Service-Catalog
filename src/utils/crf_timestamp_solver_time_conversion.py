@@ -93,7 +93,8 @@ def timestamp_to_solver_time(timestamp_to_convert: int | float, start_timestamp:
     # If it's between Saturday 6am and Monday 6am, set the start timestamp to the next Monday 6am
     if is_between_saturday_and_monday(start_timestamp):
         log.debug("The start timestamp is between Saturday and Monday", extra={"start_timestamp": timestamp_to_convert})
-        raise ValueError("The start timestamp is between Saturday and Monday.")
+        # raise ValueError("The start timestamp is between Saturday and Monday.")
+        start_timestamp = next_monday_6am(start_timestamp)
     else:
         log.debug("The start timestamp is valid", extra={"start_timestamp": timestamp_to_convert})
 

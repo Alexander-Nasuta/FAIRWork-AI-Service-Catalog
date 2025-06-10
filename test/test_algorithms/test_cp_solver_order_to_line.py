@@ -13,7 +13,12 @@ def test_lin_assignment_solver1():
     with open(file) as json_file:
         data = json.load(json_file)
 
-    _ = _perform_order_to_line_mapping(data)
+    start_timestamp = data["start_time_timestamp"]
+
+    _ = _perform_order_to_line_mapping(
+        data,
+        start_time_timestamp=start_timestamp,
+    )
 
 
 
@@ -27,6 +32,8 @@ def test_lin_assignment_solver2():
     with open(file) as json_file:
         data = json.load(json_file)
 
+    start_timestamp = data["start_time_timestamp"]
+
     data_with_perform_allocation_for_lines = data | {
         "perform_allocation_for_lines": [
             "line 17",
@@ -35,7 +42,10 @@ def test_lin_assignment_solver2():
         ],
     }
 
-    _ = _perform_order_to_line_mapping(data_with_perform_allocation_for_lines)
+    _ = _perform_order_to_line_mapping(
+        data_with_perform_allocation_for_lines,
+        start_time_timestamp=start_timestamp
+    )
 
 
 def test_lin_assignment_solver3():
@@ -48,6 +58,8 @@ def test_lin_assignment_solver3():
     with open(file) as json_file:
         data = json.load(json_file)
 
+    start_timestamp = data["start_time_timestamp"]
+
     data_with_perform_allocation_for_lines = data | {
         "perform_allocation_for_lines": [
             "line 20",
@@ -55,4 +67,7 @@ def test_lin_assignment_solver3():
         ],
     }
 
-    _ = _perform_order_to_line_mapping(data_with_perform_allocation_for_lines)
+    _ = _perform_order_to_line_mapping(
+        data_with_perform_allocation_for_lines,
+        start_time_timestamp=start_timestamp
+    )

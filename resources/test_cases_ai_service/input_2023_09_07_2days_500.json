@@ -4,7 +4,7 @@
         "line 20",
         "line 24"
     ],
-    "start_time_timestamp": 1693720800,
+    "start_time_timestamp": 1694066400,
     "order_data": [
         {
             "order": "SEV - 36",
@@ -128,10 +128,10 @@
     ],
     "geometry_line_mapping": [
         {
-            "geometry": "533908540",
-            "main_line": "line 24",
+            "geometry": "1342266080",
+            "main_line": "line 20",
             "alternative_lines": [
-                "line 20"
+                "pomigl."
             ],
             "number_of_workers": 4
         },
@@ -144,26 +144,18 @@
             "number_of_workers": 4
         },
         {
-            "geometry": "1342266080",
-            "main_line": "line 20",
-            "alternative_lines": [
-                "pomigl."
-            ],
-            "number_of_workers": 4
-        },
-        {
-            "geometry": "1342236080",
-            "main_line": "line 20",
-            "alternative_lines": [
-                "line 16"
-            ],
-            "number_of_workers": 4
-        },
-        {
-            "geometry": "531359140",
+            "geometry": "1343314080",
             "main_line": "line 17",
             "alternative_lines": [
-                "line 18"
+                "line 19"
+            ],
+            "number_of_workers": 6
+        },
+        {
+            "geometry": "534259080",
+            "main_line": "line 24",
+            "alternative_lines": [
+                "line 20"
             ],
             "number_of_workers": 4
         },
@@ -176,499 +168,39 @@
             "number_of_workers": 4
         },
         {
+            "geometry": "1342236080",
+            "main_line": "line 20",
+            "alternative_lines": [
+                "line 16"
+            ],
+            "number_of_workers": 4
+        },
+        {
+            "geometry": "533908540",
+            "main_line": "line 24",
+            "alternative_lines": [
+                "line 20"
+            ],
+            "number_of_workers": 4
+        },
+        {
+            "geometry": "531359140",
+            "main_line": "line 17",
+            "alternative_lines": [
+                "line 18"
+            ],
+            "number_of_workers": 4
+        },
+        {
             "geometry": "534259180",
             "main_line": "line 24",
             "alternative_lines": [
                 "line 20"
             ],
             "number_of_workers": 4
-        },
-        {
-            "geometry": "534259080",
-            "main_line": "line 24",
-            "alternative_lines": [
-                "line 20"
-            ],
-            "number_of_workers": 4
-        },
-        {
-            "geometry": "1343314080",
-            "main_line": "line 17",
-            "alternative_lines": [
-                "line 19"
-            ],
-            "number_of_workers": 6
         }
     ],
     "availabilities": [
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15004479"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693951200,
-            "end_timestamp": 1693980000,
-            "worker": "15004666"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15004696"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15009882"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15009935"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15013130"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15013367"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15013533"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15013870"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15014209"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15014212"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15014729"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15014964"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15015125"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15015261"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15015264"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693951200,
-            "end_timestamp": 1693980000,
-            "worker": "15015349"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15015351"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693951200,
-            "end_timestamp": 1693980000,
-            "worker": "15015510"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15015514"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693951200,
-            "end_timestamp": 1693980000,
-            "worker": "15015554"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15015568"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15015610"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693951200,
-            "end_timestamp": 1693980000,
-            "worker": "15015650"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15015652"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15015653"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15016112"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15016591"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15016633"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15017042"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15017049"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15020309"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15028786"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15028790"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15028837"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15028914"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15028961"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693922400,
-            "end_timestamp": 1693951200,
-            "worker": "15040627"
-        },
-        {
-            "date": "2023-09-05",
-            "from_timestamp": 1693893600,
-            "end_timestamp": 1693922400,
-            "worker": "15097932"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15004479"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694037600,
-            "end_timestamp": 1694066400,
-            "worker": "15004666"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15004696"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15009882"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15009935"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15013130"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15013367"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15013533"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15013870"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15014209"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15014212"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15014729"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15014964"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15015125"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15015261"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15015264"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694037600,
-            "end_timestamp": 1694066400,
-            "worker": "15015349"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15015351"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694037600,
-            "end_timestamp": 1694066400,
-            "worker": "15015510"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15015514"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694037600,
-            "end_timestamp": 1694066400,
-            "worker": "15015554"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15015568"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15015610"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694037600,
-            "end_timestamp": 1694066400,
-            "worker": "15015650"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15015652"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15015653"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15016112"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15016591"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15016633"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15017042"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15017049"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15020309"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15028786"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15028790"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15028837"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15028914"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15028961"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1694008800,
-            "end_timestamp": 1694037600,
-            "worker": "15040627"
-        },
-        {
-            "date": "2023-09-06",
-            "from_timestamp": 1693980000,
-            "end_timestamp": 1694008800,
-            "worker": "15097932"
-        },
         {
             "date": "2023-09-07",
             "from_timestamp": 1694066400,

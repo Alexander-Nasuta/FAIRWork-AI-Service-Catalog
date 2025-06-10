@@ -181,22 +181,48 @@ class HybridBalancedBalanced(Resource):
         preferences are respected. The problem is simplified to allow efficient solving while still producing
         high-quality, realistic worker assignments.
         '''
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
-
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -234,19 +260,38 @@ class HybridBalancedPreference(Resource):
         alignment of personal preferences and feasible execution of generating the production plan.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -282,19 +327,38 @@ class HybridBalancedResilience(Resource):
         operational stability.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -332,19 +396,38 @@ class HybridBalancedExperience(Resource):
         This improves productivity and quality by ensuring skilled personnel are matched with the most suitable tasks.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -385,19 +468,38 @@ class HybridBalancedBalancedRL(Resource):
         but it is still more efficient than some other simulation-based methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -438,19 +540,38 @@ class HybridBalancedPreferenceRL(Resource):
         balanced approach between complexity and performance.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -489,19 +610,38 @@ class HybridBalancedResilienceRL(Resource):
         solutions.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -541,19 +681,38 @@ class HybridBalancedExperienceRL(Resource):
         providing a good balance between resource use and performance optimization.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -592,19 +751,38 @@ class HybridBalancedBalancedMCTS(Resource):
         time, the MCTS planner anticipates multiple workforce configurations before selecting the most balanced outcome.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -641,19 +819,38 @@ class HybridBalancedPreferenceMCTS(Resource):
         This results in higher satisfaction and engagement while still preserving scheduling feasibility.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -688,19 +885,38 @@ class HybridBalancedResilienceMCTS(Resource):
         specifically evaluating their resilience.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -738,19 +954,38 @@ class HybridBalancedExperienceMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -792,19 +1027,38 @@ class HybridMakespanBalanced(Resource):
         reliable workers across the production lines.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -840,19 +1094,38 @@ class HybridMakespanPreference(Resource):
         delivering a solution that supports satisfaction and motivation in the workforce.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -887,19 +1160,38 @@ class HybridMakespanResilience(Resource):
         ensure timely results, delivering a robust and practical workforce layout.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -936,19 +1228,38 @@ class HybridMakespanExperience(Resource):
         workforce expertise.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -989,19 +1300,38 @@ class HybridMakespanBalancedRL(Resource):
         of learning with practical performance.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1044,19 +1374,38 @@ class HybridMakespanPreferenceRL(Resource):
         satisfaction with production efficiency.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1094,19 +1443,38 @@ class HybridMakespanResilienceRL(Resource):
         the complexity of resilience-based worker allocation.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1147,19 +1515,38 @@ class HybridMakespanExperienceRL(Resource):
         providing a good balance between resource use and performance optimization.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1201,19 +1588,38 @@ class HybridMakespanBalancedMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1251,19 +1657,38 @@ class HybridMakespanPreferenceMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1298,19 +1723,38 @@ class HybridMakespanResilienceMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1348,19 +1792,38 @@ class HybridMakespanExperienceMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
             makespan_weight=1,
-            tardiness_weight=0
+            tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1401,19 +1864,38 @@ class HybridMakespanBalanced(Resource):
         a reliable, skilled, and satisfied workforce.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1449,19 +1931,38 @@ class HybridMakespanPreference(Resource):
         that can boost morale and engagement.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1495,19 +1996,38 @@ class HybridMakespanResilience(Resource):
         The second stage focuses on resilience in worker allocation.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1544,19 +2064,38 @@ class HybridMakespanExperience(Resource):
         effectively across the system.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1599,19 +2138,38 @@ class HybridMakespanBalancedRL(Resource):
         approach to worker assignment and performance optimization.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1652,19 +2210,38 @@ class HybridMakespanPreferenceRL(Resource):
         balance between personalization and production efficiency.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1703,19 +2280,38 @@ class HybridMakespanResilienceRL(Resource):
         worker resilience and operational performance.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1754,19 +2350,38 @@ class HybridMakespanExperienceRL(Resource):
         balancing learning time with optimization benefits.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1808,19 +2423,38 @@ class HybridMakespanBalancedMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1858,19 +2492,38 @@ class HybridMakespanPreferenceMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1907,19 +2560,38 @@ class HybridMakespanResilienceMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,
@@ -1958,19 +2630,38 @@ class HybridMakespanExperienceMCTS(Resource):
         MCTS approaches are computationally heavy and result in the longest solution times among all allocation methods.
         """
 
+        api_data = api.payload
+
+        start_timestamp = api_data["start_time_timestamp"]
+
+        worker_availabilities = api_data["availabilities"]
+        geometry_line_mapping = api_data["geometry_line_mapping"]
+        human_factor_data = api_data["human_factor"]
+        order_data = api_data["order_data"]
+        throughput_mapping = api_data["throughput_mapping"]
+
+        # change start timestamp to the earliest worker availability if there is a mismatch
+        start_timestamp = max(
+            start_timestamp,
+            min([elem['from_timestamp'] for elem in worker_availabilities])
+        ) if len(worker_availabilities) else start_timestamp
+
+        # return empy list if there are no orders
+        if not len(order_data):
+            return {
+                "experience": 0,
+                "preference": 0,
+                "resilience": 0,
+                "transparency": "high",
+                "allocations": [],
+            }
+
         allocations_dict = _perform_order_to_line_mapping(
-            api_payload=api.payload,
-            makespan_weight=0,
+            api_payload=api_data,
+            start_time_timestamp=start_timestamp,
+            makespan_weight=1,
             tardiness_weight=1
         )
-
-        start_timestamp = api.payload["start_time_timestamp"]
-
-        worker_availabilities = api.payload["availabilities"]
-        geometry_line_mapping = api.payload["geometry_line_mapping"]
-        human_factor_data = api.payload["human_factor"]
-        order_data = api.payload["order_data"]
-        throughput_mapping = api.payload["throughput_mapping"]
 
         env = CrfWorkerAllocationEnv(
             previous_step_output=allocations_dict,

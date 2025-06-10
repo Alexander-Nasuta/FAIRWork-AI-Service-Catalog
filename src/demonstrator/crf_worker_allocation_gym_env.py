@@ -196,7 +196,9 @@ class CrfWorkerAllocationEnv(gym.Env):
         # ...
         # action = _n_workers * _n_rows - 1 is the last worker for the last row
         possible_actions = self._n_workers * self._n_rows
-        self.action_space = gym.spaces.Discrete(possible_actions)
+
+        self._no_action_falg = False if possible_actions > 0 else True
+        self.action_space = gym.spaces.Discrete(possible_actions if possible_actions > 0 else 1)
 
         initial_observation = self._state_as_numpy_array()
         self.observation_space = gym.spaces.Box(
@@ -205,6 +207,7 @@ class CrfWorkerAllocationEnv(gym.Env):
             shape=initial_observation.shape,
             dtype=initial_observation.dtype
         )
+
 
     def action_tuple_to_action_idx(self, action_tuple: tuple[int, int]) -> int:
         row, worker = action_tuple
@@ -231,6 +234,7 @@ class CrfWorkerAllocationEnv(gym.Env):
                 'Finish_solver_time': timestamp_to_solver_time(elem['Finish'], start_timestamp),
             } for elem in line_allocations
         ]
+        # print(f"line_allocations: {pprint.pformat(line_allocations)}")
 
         # map worker availabilities to solver time domain
         worker_availabilities = [
@@ -239,6 +243,7 @@ class CrfWorkerAllocationEnv(gym.Env):
                 'end_solver_time': timestamp_to_solver_time(elem['end_timestamp'], start_timestamp),
             } for elem in worker_availabilities
         ]
+        print(f"worker_availabilities: {pprint.pformat(worker_availabilities)}")
 
         relevant_intervals = CrfWorkerAllocationEnv._get_relevant_intervals(
             line_allocations=line_allocations,
@@ -356,12 +361,13 @@ class CrfWorkerAllocationEnv(gym.Env):
                     assert _setup_time_within_timebox == interval_duration
                     assert production_time == 0, f"production time should be 0, but is {production_time} for task {task} and interval {interval_idx}"
 
+                throughput_in_units_per_hour = get_throughput(
+                    throughput_mapping=throughput_mapping,
+                    geometry=line_elem['geometry'],
+                    line=line_elem['Resource'],
+                )
                 if production_time:
-                    throughput_in_units_per_hour = get_throughput(
-                        throughput_mapping=throughput_mapping,
-                        geometry=line_elem['geometry'],
-                        line=line_elem['Resource'],
-                    )
+
                     assert throughput_in_units_per_hour > 0
                     # note: production time is in minutes
                     produced_amount = throughput_in_units_per_hour * production_time / 60
@@ -467,6 +473,7 @@ class CrfWorkerAllocationEnv(gym.Env):
 
                 df_data.append(data_row_dict)
 
+        print(f"line_allocations after processing: {pprint.pformat(df_data)}")
         df = pd.DataFrame(df_data)
 
         # sanity checks
@@ -482,7 +489,9 @@ class CrfWorkerAllocationEnv(gym.Env):
         for task in tasks:
             ratio = df[df['Task'] == task]['produced_amount'].sum() / task_total_amount_mapping[task]
             log.debug(
-                f"produced amount for task '{task}': {df[df['Task'] == task]['produced_amount'].sum()}, expected: {task_total_amount_mapping[task]}, ratio: {ratio}")
+                f"produced amount for task '{task}': {df[df['Task'] == task]['produced_amount'].sum()}, expected: {task_total_amount_mapping[task]}, ratio: {ratio}"
+            )
+            print(f"produced amount for task '{task}': {df[df['Task'] == task]['produced_amount'].sum()}, expected: {task_total_amount_mapping[task]}, ratio: {ratio}")
             assert df[df['Task'] == task]['produced_amount'].sum() == task_total_amount_mapping[task], \
                 f"produced amount does not add up to total amount for task {task}"
 
@@ -548,10 +557,14 @@ class CrfWorkerAllocationEnv(gym.Env):
 
         interval_bounds_ascending_list = sorted(list(interval_bounds))
 
+        log.debug(f"interval bounds (solver time): {interval_bounds_ascending_list}")
+
         interval_tuple = []  # [(start, end), ...]
-        for interval_start, interval_end in zip(interval_bounds_ascending_list[:-1],
+        for interval_start, interval_end in zip(interval_bounds_ascending_list[:],  # all but the last element
                                                 interval_bounds_ascending_list[1:]):
             interval_tuple.append((interval_start, interval_end))
+
+        log.debug(f"interval tuple (solver time): {interval_tuple}")
 
         n_intervals = len(interval_tuple)
         log.debug(f"the schedule is devided into {n_intervals} intervals: {interval_tuple}")
@@ -585,7 +598,9 @@ class CrfWorkerAllocationEnv(gym.Env):
             ]
             log.debug(pprint.pformat(workers_within_interval))
 
-            if len(workers_within_interval) and len(line_allocations_within_interval):
+            # if len(workers_within_interval) and len(line_allocations_within_interval):
+            # only finter based on line allocations. that way total amount adds up to the correct value
+            if len(line_allocations_within_interval):
                 relevant_intervals.append((interval_start, interval_end))
 
         return relevant_intervals
@@ -631,6 +646,8 @@ class CrfWorkerAllocationEnv(gym.Env):
                 return 0
 
     def step(self, action: int) -> (npt.NDArray, SupportsFloat, bool, bool, dict[str, Any]):
+        if self._no_action_falg == True:
+            return self._state_as_numpy_array(), 0, True, False, {}
         # convert action to tuple
         action_row, action_worker = self.action_idx_to_action_tuple(action)
         # log.info(f"performing action: {action} ({action_row}, {action_worker})")
@@ -898,6 +915,8 @@ class CrfWorkerAllocationEnv(gym.Env):
         print(df[cols_to_display].to_string())
 
     def is_terminal_state(self) -> bool:
+        if self._no_action_falg:
+            return True
         # the terminal state is reached when is_current_interval is 0 for all rows
         # return not self._state['is_current_interval'].any()
         return not len(self.valid_action_tuples())
@@ -1252,8 +1271,8 @@ class CrfWorkerAllocationEnv(gym.Env):
         offset = 2 * 3600
         [
             allocation.update({
-                # "Start": solver_time_to_timestamp(allocation['Start'], self._start_timestamp) + offset,
-                # "Finish": solver_time_to_timestamp(allocation['Finish'], self._start_timestamp) + offset,
+                "Start": solver_time_to_timestamp(allocation['Start'], self._start_timestamp) + offset,
+                "Finish": solver_time_to_timestamp(allocation['Finish'], self._start_timestamp) + offset,
                 "warning": "Too few workers assigned" if len(allocation['workers']) < allocation[
                     'required_workers'] else None,
                 "order_total_amount": allocation['total_amount'],
