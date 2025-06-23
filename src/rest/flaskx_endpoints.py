@@ -83,9 +83,12 @@ class CrfCpOptimizerMakespanEndpoint(Resource):
         deadlines in favor of throughput efficiency.
         """
 
+        start_timestamp = api.payload["start_time_timestamp"]
+
         allocations_dict = _perform_order_to_line_mapping(
             api_payload=api.payload,
             makespan_weight=1,
+            start_time_timestamp=start_timestamp,
             tardiness_weight=0
         )
 
@@ -112,9 +115,12 @@ class CrfCpOptimizerTardinessEndpoint(Resource):
         even if it reduces machine utilization by prioritizing deadline adherence over throughput.
         """
 
+        start_timestamp = api.payload["start_time_timestamp"]
+
         allocations_dict = _perform_order_to_line_mapping(
             api_payload=api.payload,
             makespan_weight=0,
+            start_time_timestamp=start_timestamp,
             tardiness_weight=1
         )
 
@@ -143,9 +149,13 @@ class CrfCpOptimizerTardinessAndMakespanEndpoint(Resource):
         It may occasionally delay early-starting orders in favor of completing others on time to meet due dates more
         effectively.
         """
+
+        start_timestamp = api.payload["start_time_timestamp"]
+
         allocations_dict = _perform_order_to_line_mapping(
             api_payload=api.payload,
             makespan_weight=1,
+            start_time_timestamp=start_timestamp,
             tardiness_weight=1
         )
 
