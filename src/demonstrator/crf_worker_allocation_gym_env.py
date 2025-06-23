@@ -1267,8 +1267,8 @@ class CrfWorkerAllocationEnv(gym.Env):
 
 
         # map to timestamp domain
-        # do i two hours offset, because consumer api is in UTC+2
-        offset = 2 * 3600
+        # do i two hours offset
+        offset = -2 * 3600
         [
             allocation.update({
                 "Start": solver_time_to_timestamp(allocation['Start'], self._start_timestamp) + offset,
